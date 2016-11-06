@@ -1,0 +1,26 @@
+{
+  "name": "saber",
+  "version": "1.0.0",
+  "description": "Template engine which is simple, powerfull and easy to use.",
+  "main": "saber.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eshengsky/saber.git"
+  },
+  "keywords": [
+    "template",
+    "view",
+    "engine",
+    "node",
+    "nodejs"
+  ],
+  "author": "Sky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eshengsky/saber/issues"
+  },
+  "homepage": "https://github.com/eshengsky/saber#readme"
+}
