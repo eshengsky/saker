@@ -24,6 +24,30 @@ var fs = require('fs');
     };
 
     /**
+     * @后面所跟 '{' 的类型
+     * @type {{other: number, if: number, for: number, while: number, do: number, switch: number}}
+     */
+    var bracesEnum = {
+        noAt: 0, //不带@的'{'
+        atIf: 1, //@if 特殊：可能有else if{...}else{...}
+        atFor: 2, //@for
+        atWhile: 3, //@while
+        atDo: 4, //@do 特殊：可能有while
+        atSwitch: 5, //@switch
+        atTry: 6, //@try　特殊：可能有catch{...}finally{...}
+        atOther: 10 //@{...}等
+    };
+
+    /**
+     * @后面所跟 '(' 的类型
+     * @type {{noAt: number, withAt: number}}
+     */
+    var bracketsEnum = {
+        noAt: 0, //不带@的'('
+        withAt: 1 //带@的'('
+    };
+
+    /**
      * 模型对象，存储parse需要用到的一些值
      * @type {{source: string, position: number, state: number}}
      */
@@ -31,8 +55,9 @@ var fs = require('fs');
         source: '', //要解析的源码
         position: 0, //当前处理的位置
         state: stateEnum.client, //当前读取状态
-        braces: [], //左大括号计数器，规则：遇到 '@{'，插入 true，遇到 '{' 插入 false，遇到 '}' 弹出末尾值
-        brackets: [] //左小括号计数器，规则：遇到 '(' push，遇到 ')' pop
+        quotes: [], //引号计数器，规则：当遇到了引号，且引号之前不是'\'时，若数组末尾元素与其相同，则弹出，若不同，则插入
+        braces: [], //左大括号计数器，规则：遇到 '@{' push，遇到 '}' pop，push类型：{type: blockEnum.xxx, position: xxx}
+        brackets: [] //左小括号计数器，规则：遇到 '(' push，遇到 ')' pop，push类型：当前位置数值position
     };
 
     /**
@@ -50,7 +75,7 @@ var fs = require('fs');
          * @returns {string|XML}
          */
         escape: function (str) {
-            return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/[\n\r]/g, '');
+            return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r/g, '\\r').replace(/\n/g, '\\n');
 
         },
 
@@ -208,15 +233,20 @@ var fs = require('fs');
                 console.warn('在代码内部，请直接写脚本，不需要加上前缀“@”。');
                 continue;
             }
+            //如果 '<' 不在括号内部，则认为是标记语言的开始，退出循环
+            if (char === '<' &&
+                (parseModel.brackets.length === 0
+                    || (parseModel.brackets.length > 0
+                    && parseModel.brackets[parseModel.brackets.length - 1] < parseModel.braces[parseModel.braces.length - 1].position)
+                )) {
+                break;
+            }
             if (char === '(') {
                 parseModel.brackets.push(parseModel.position);
             } else if (char === ')') {
                 parseModel.brackets.pop();
             }
-            //如果 '<' 不在括号内部，则认为是标记语言的开始，退出循环
-            if (char === '<' && (parseModel.brackets.length === 0 || (parseModel.brackets.length > 0 && parseModel.braces[parseModel.braces.length - 1] && parseModel.brackets[0] < parseModel.braces[parseModel.braces.length - 1].position))) {
-                break;
-            }
+
             if (char === '{') {
                 //'@{}'内部又有'@{}'，这里做下容错处理
                 if (parseModel.braces[parseModel.braces.length - 1] && parseModel.braces[parseModel.braces.length - 1].state === true && readPrevChars(1) === '@') {
@@ -460,9 +490,17 @@ var fs = require('fs');
                 fn += content;
                 fn += ';return $$$saber_data$$$.join("");';
                 var html = (new Function('model', fn)(model));
-                cb(null, html);
+                if(typeof cb === 'function'){
+                    cb(null, html);
+                }else{
+                    return html;
+                }
             } catch (e) {
-                cb(e);
+                if(typeof cb === 'function'){
+                    cb(e);
+                }else{
+                    return e.stack;
+                }
             }
         },
 
