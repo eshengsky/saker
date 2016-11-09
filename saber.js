@@ -9,8 +9,11 @@ var fs = require('fs');
      * @type {{client: number, server: number}}
      */
     var stateEnum = {
-        client: 0, //前端代码
-        server: 1 //后端代码
+        //前端代码
+        client: 0,
+
+        //后端代码
+        server: 1
     };
 
     /**
@@ -18,33 +21,53 @@ var fs = require('fs');
      * @type {{markup: number, expression: number, script: number}}
      */
     var modeEnum = {
-        markup: 0, //html标记
-        expression: 1, //js表达式
-        script: 2 //块状js代码
+        //html标记
+        markup: 0,
+
+        //js表达式
+        expression: 1,
+
+        //块状js代码
+        script: 2
     };
 
     /**
-     * @后面所跟 '{' 的类型
+     * 引号类型枚举
+     * @type {{singleQuotes: number, doubleQuotes: number}}
+     */
+    var quotesEnum = {
+        singleQuotes: 0,
+        doubleQuotes: 1
+    };
+
+    /**
+     * @后面所跟 '{' 的类型枚举
      * @type {{other: number, if: number, for: number, while: number, do: number, switch: number}}
      */
     var bracesEnum = {
-        noAt: 0, //不带@的'{'
-        atIf: 1, //@if 特殊：可能有else if{...}else{...}
-        atFor: 2, //@for
-        atWhile: 3, //@while
-        atDo: 4, //@do 特殊：可能有while
-        atSwitch: 5, //@switch
-        atTry: 6, //@try　特殊：可能有catch{...}finally{...}
-        atOther: 10 //@{...}等
-    };
+        //不带@的'{'
+        noAt: 0,
 
-    /**
-     * @后面所跟 '(' 的类型
-     * @type {{noAt: number, withAt: number}}
-     */
-    var bracketsEnum = {
-        noAt: 0, //不带@的'('
-        withAt: 1 //带@的'('
+        //@if 特殊：可能有else if{...}else{...}
+        atIf: 1,
+
+        //@for
+        atFor: 2,
+
+        //@while
+        atWhile: 3,
+
+        //@do 特殊：可能有while
+        atDo: 4,
+
+        //@switch
+        atSwitch: 5,
+
+        //@try　特殊：可能有catch{...}finally{...}
+        atTry: 6,
+
+        //@{...}等
+        atOther: 10
     };
 
     /**
@@ -52,12 +75,23 @@ var fs = require('fs');
      * @type {{source: string, position: number, state: number}}
      */
     var parseModel = {
-        source: '', //要解析的源码
-        position: 0, //当前处理的位置
-        state: stateEnum.client, //当前读取状态
-        quotes: [], //引号计数器，规则：当遇到了引号，且引号之前不是'\'时，若数组末尾元素与其相同，则弹出，若不同，则插入
-        braces: [], //左大括号计数器，规则：遇到 '@{' push，遇到 '}' pop，push类型：{type: blockEnum.xxx, position: xxx}
-        brackets: [] //左小括号计数器，规则：遇到 '(' push，遇到 ')' pop，push类型：当前位置数值position
+        //要解析的源码
+        source: '',
+
+        //当前处理的位置
+        position: 0,
+
+        //当前读取状态
+        state: stateEnum.client,
+
+        //引号计数器，规则：当遇到了引号，且引号之前不是'\'时，若数组为空则push，若数组不为空且值与它相同则pop，push类型：{type: quotesEnum.xxx, position: xxx}
+        quotes: [],
+
+        //左大括号计数器，规则：遇到 '{' push，遇到 '}' pop，push类型：{type: bracesEnum.xxx, position: xxx}
+        braces: [],
+
+        //左小括号计数器，规则：遇到 '(' push，遇到 ')' pop，push类型：position
+        brackets: []
     };
 
     /**
@@ -84,7 +118,7 @@ var fs = require('fs');
          * @param obj
          */
         addSegment: function (obj) {
-            if(obj.data){
+            if (obj.data) {
                 switch (obj.type) {
                     case 0:
                         this.segments.push('writeLiteral("' + this.escape(obj.data) + '");');
@@ -204,8 +238,39 @@ var fs = require('fs');
             return undefined;
         }
         for (; parseModel.position < len; parseModel.position++) {
-            char = parseModel.source.substr(parseModel.position, 1);
-            if ([' ', '<', '"', "'"].indexOf(char) > -1) {
+            char = readNextChars(1);
+            //引号的处理
+            if ((char === '"' || char === "'") && readPrevChars(1) !== '\\') {
+                if (parseModel.quotes.length === 0) {
+                    parseModel.quotes.push({
+                        type: char === '"' ? quotesEnum.doubleQuotes : quotesEnum.singleQuotes,
+                        position: parseModel.position
+                    });
+                } else if (parseModel.quotes.length > 0) {
+                    if (char === '"' && parseModel.quotes[0].type === quotesEnum.doubleQuotes) {
+                        parseModel.quotes.pop();
+                    } else if (char === "'" && parseModel.quotes[0].type === quotesEnum.singleQuotes) {
+                        parseModel.quotes.pop();
+                    }
+                }
+            }
+
+            if (char === '(' && parseModel.quotes.length === 0) {
+                parseModel.brackets.push(parseModel.position);
+            } else if (char === ')' && parseModel.quotes.length === 0) {
+                parseModel.brackets.pop();
+            }
+
+            if (char === '\r'
+                || char === '\n'
+                || (char === ' ' && parseModel.brackets.length === 0)
+                || (char === '"' && parseModel.brackets.length === 0)
+                || (char === "'" && parseModel.brackets.length === 0)
+                || (char === '<' && parseModel.quotes.length === 0)) {
+                break;
+            } else if (char === ')' && [').', ')[', ')]', ')('].indexOf(readNextChars(2)) === -1) {
+                result += char;
+                parseModel.position++;
                 break;
             }
             result += char;
@@ -233,53 +298,77 @@ var fs = require('fs');
                 console.warn('在代码内部，请直接写脚本，不需要加上前缀“@”。');
                 continue;
             }
+            //引号的处理
+            if ((char === '"' || char === "'") && readPrevChars(1) !== '\\') {
+                if (parseModel.quotes.length === 0) {
+                    parseModel.quotes.push({
+                        type: char === '"' ? quotesEnum.doubleQuotes : quotesEnum.singleQuotes,
+                        position: parseModel.position
+                    });
+                } else if (parseModel.quotes.length > 0) {
+                    if (char === '"' && parseModel.quotes[0].type === quotesEnum.doubleQuotes) {
+                        parseModel.quotes.pop();
+                    } else if (char === "'" && parseModel.quotes[0].type === quotesEnum.singleQuotes) {
+                        parseModel.quotes.pop();
+                    }
+                }
+            }
             //如果 '<' 不在括号内部，则认为是标记语言的开始，退出循环
-            if (char === '<' &&
+            if (char === '<' && parseModel.quotes.length === 0 &&
                 (parseModel.brackets.length === 0
                     || (parseModel.brackets.length > 0
                     && parseModel.brackets[parseModel.brackets.length - 1] < parseModel.braces[parseModel.braces.length - 1].position)
                 )) {
                 break;
             }
-            if (char === '(') {
+            if (char === '(' && parseModel.quotes.length === 0) {
                 parseModel.brackets.push(parseModel.position);
-            } else if (char === ')') {
+            } else if (char === ')' && parseModel.quotes.length === 0) {
                 parseModel.brackets.pop();
             }
 
-            if (char === '{') {
+            if (char === '{' && parseModel.quotes.length === 0) {
                 //'@{}'内部又有'@{}'，这里做下容错处理
-                if (parseModel.braces[parseModel.braces.length - 1] && parseModel.braces[parseModel.braces.length - 1].state === true && readPrevChars(1) === '@') {
+                if (parseModel.braces[parseModel.braces.length - 1] && parseModel.braces[parseModel.braces.length - 1].type > 0 && readPrevChars(1) === '@') {
                     parseModel.braces.push({
-                        state: false,
+                        type: bracesEnum.noAt,
                         position: parseModel.position
                     });
                 } else {
-                    //遇到 '@{'，则插入true，否则遇到 '{'，则插入false
                     parseModel.braces.push({
-                        state: readPrevChars(1) === '@',
+                        type: readPrevChars(1) === '@' ? bracesEnum.atOther : bracesEnum.noAt,
                         position: parseModel.position
                     });
                 }
-            } else if (char === '}') {
+            } else if (char === '}' && parseModel.quotes.length === 0) {
                 braceState = parseModel.braces.pop();
                 //如果该 '}' 对应的是 '@{'
-                if (braceState.state) {
-                    if (/(?:^}\s*?else\s*?\{)|(?:^}\s*?else\s+if\s*?\([\s\S]+?\)\s*?\{)/.test(readNextChars())) {
+                if (braceState.type > 0) {
+                    if (braceState.type === bracesEnum.atIf && (/(?:^}\s*?else\s*?\{)|(?:^}\s*?else\s+if\s*?\([\s\S]+?\)\s*?\{)/.test(readNextChars()))) {
                         //如果 '}' 后面是 'else {' 或者 'else if {' 或者 'while(...)'，依然识别为脚本语言，同时处理下braces
                         matched = readNextChars().match(/(?:^}\s*?else\s*?\{)|(?:^}\s*?else\s+if\s*?\([\s\S]+?\)\s*?\{)/);
                         result += matched[0];
                         parseModel.position += matched[0].length;
                         parseModel.braces.push({
-                            state: true,
+                            type: bracesEnum.atIf,
                             position: parseModel.position
                         });
                         continue;
-                    } else if (/^}\s*?while\s*?\([\s\S]+?\)/.test(readNextChars())) {
-                        //如果 '}' 后面是 'while(...)'，依然识别为脚本语言
+                    } else if (braceState.type === bracesEnum.atDo && (/^}\s*?while\s*?\([\s\S]+?\)/.test(readNextChars()))) {
+                        //如果 '}' 后面是 'while(...);'，依然识别为脚本语言
                         matched = readNextChars().match(/^}\s*?while\s*?\([\s\S]+?\)/);
                         result += matched[0];
                         parseModel.position += matched[0].length;
+                        continue;
+                    } else if (braceState.type === bracesEnum.atTry && (/(?:^}\s*?catch\([\s\S]+?\)\s*?\{)|(?:^}\s*?finally\s*?\{)/.test(readNextChars()))) {
+                        //如果 '}' 后面是 'catch(...){' 或者 'finally {'，依然识别为脚本语言，同时处理下braces
+                        matched = readNextChars().match(/(?:^}\s*?catch\([\s\S]+?\)\s*?\{)|(?:^}\s*?finally\s*?\{)/);
+                        result += matched[0];
+                        parseModel.position += matched[0].length;
+                        parseModel.braces.push({
+                            type: bracesEnum.atTry,
+                            position: parseModel.position
+                        });
                         continue;
                     } else {
                         //否则停止循环，启动标记语言读取模式
@@ -297,7 +386,7 @@ var fs = require('fs');
     };
 
     /**
-     * 读取(...)内的代码
+     * 读取@(...)内的代码
      * @returns {*}
      */
     var readBracketCode = function () {
@@ -338,6 +427,7 @@ var fs = require('fs');
         parseModel.source = template;
         parseModel.position = 0;
         parseModel.state = stateEnum.client;
+        parseModel.quotes = [];
         parseModel.braces = [];
         parseModel.brackets = [];
         while (parseModel.position < parseModel.source.length) {
@@ -353,7 +443,16 @@ var fs = require('fs');
                 if (nextChar === '@') {
                     parseModel.position++;
                     nextChar = readNextChars(1);
-                    if (nextChar === '(') {
+                    if (nextChar === '@') {
+                        parseModel.position++;
+                        parseModel.state = stateEnum.client; //准备进入前端读取模式
+                        contentHandler.addSegment({
+                            data: '@',
+                            type: modeEnum.markup
+                        });
+                    } else if (nextChar === '"' | nextChar === "'") {
+                        throw '引号在代码块开头无效。只有标识符、关键字、注释、“(”和“{”才有效。';
+                    } else if (nextChar === '(') {
                         code = readBracketCode();
                         contentHandler.addSegment({
                             data: code,
@@ -369,7 +468,7 @@ var fs = require('fs');
                         matchedText = readNextChars().match(/^if\s*?\([\s\S]+?\)\s*\{/)[0];
                         parseModel.position += matchedText.length;
                         parseModel.braces.push({
-                            state: true,
+                            type: bracesEnum.atIf,
                             position: parseModel.position
                         });
                         code = readBlockServerCode();
@@ -381,7 +480,7 @@ var fs = require('fs');
                         matchedText = readNextChars().match(/^for\s*?\([\s\S]+?\)\s*\{/)[0];
                         parseModel.position += matchedText.length;
                         parseModel.braces.push({
-                            state: true,
+                            type: bracesEnum.atFor,
                             position: parseModel.position
                         });
                         code = readBlockServerCode();
@@ -393,7 +492,7 @@ var fs = require('fs');
                         matchedText = readNextChars().match(/^while\s*?\([\s\S]+?\)\s*\{/)[0];
                         parseModel.position += matchedText.length;
                         parseModel.braces.push({
-                            state: true,
+                            type: bracesEnum.atWhile,
                             position: parseModel.position
                         });
                         code = readBlockServerCode();
@@ -405,7 +504,7 @@ var fs = require('fs');
                         matchedText = readNextChars().match(/^do\s*?\{/)[0];
                         parseModel.position += matchedText.length;
                         parseModel.braces.push({
-                            state: true,
+                            type: bracesEnum.atDo,
                             position: parseModel.position
                         });
                         code = readBlockServerCode();
@@ -417,7 +516,7 @@ var fs = require('fs');
                         matchedText = readNextChars().match(/^switch\s*?\([\s\S]+?\)\s*\{/)[0];
                         parseModel.position += matchedText.length;
                         parseModel.braces.push({
-                            state: true,
+                            type: bracesEnum.atSwitch,
                             position: parseModel.position
                         });
                         code = readBlockServerCode();
@@ -425,12 +524,17 @@ var fs = require('fs');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === '@') {
-                        parseModel.position++;
-                        parseModel.state = stateEnum.client; //准备进入前端读取模式
+                    } else if (nextChar === 't' && readNextChars(3) === 'try' && /^try\s*?\{/.test(readNextChars())) {
+                        matchedText = readNextChars().match(/^try\s*?\{/)[0];
+                        parseModel.position += matchedText.length;
+                        parseModel.braces.push({
+                            type: bracesEnum.atTry,
+                            position: parseModel.position
+                        });
+                        code = readBlockServerCode();
                         contentHandler.addSegment({
-                            data: '@',
-                            type: modeEnum.markup
+                            data: matchedText + code,
+                            type: modeEnum.script
                         });
                     } else {
                         code = readLineServerCode();
@@ -490,15 +594,15 @@ var fs = require('fs');
                 fn += content;
                 fn += ';return $$$saber_data$$$.join("");';
                 var html = (new Function('model', fn)(model));
-                if(typeof cb === 'function'){
+                if (typeof cb === 'function') {
                     cb(null, html);
-                }else{
+                } else {
                     return html;
                 }
             } catch (e) {
-                if(typeof cb === 'function'){
+                if (typeof cb === 'function') {
                     cb(e);
-                }else{
+                } else {
                     return e.stack;
                 }
             }
