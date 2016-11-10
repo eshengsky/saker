@@ -261,18 +261,34 @@ var fs = require('fs');
                 parseModel.brackets.pop();
             }
 
-            if (char === '\r'
-                || char === '\n'
-                || (char === ' ' && parseModel.brackets.length === 0)
-                || (char === '"' && parseModel.brackets.length === 0)
-                || (char === "'" && parseModel.brackets.length === 0)
-                || (char === '<' && parseModel.quotes.length === 0)) {
+            //除这些外，且不在引号内部的特殊字符，都break
+            if (['.', ',', '(', ')', '[', ']', '"', "'", ' '].indexOf(char) === -1 && /\W/.test(char)) {
                 break;
-            } else if (char === ')' && [').', ')[', ')]', ')('].indexOf(readNextChars(2)) === -1) {
+            }
+
+            //class="@name"   class="@arr.join('')"
+            if ((char === '"' || char === "'") && parseModel.brackets.length === 0){
+                break;
+            }
+
+            //class="@name abc"   class="@arr.join(' ') abc"
+            if (char === ' ' && parseModel.brackets.length === 0){
+                break;
+            }
+
+            //class="@name.toString()abc"   class="@arr.join().toString()abc"
+            if (char === ')' && [').', ')[', ')]', ')('].indexOf(readNextChars(2)) === -1) {
                 result += char;
                 parseModel.position++;
                 break;
             }
+
+            if (char === ']' && ['].', '][', ']]', ']('].indexOf(readNextChars(2)) === -1) {
+                result += char;
+                parseModel.position++;
+                break;
+            }
+
             result += char;
         }
         parseModel.state = stateEnum.client; //准备进入前端读取模式
@@ -579,6 +595,7 @@ var fs = require('fs');
          */
         compile: function (template, model, cb) {
             try {
+                console.info(template)
                 var contentHandler = parse(template);
                 var content = contentHandler.getContent();
                 console.log(content);
@@ -603,7 +620,7 @@ var fs = require('fs');
                 if (typeof cb === 'function') {
                     cb(e);
                 } else {
-                    return e.stack;
+                    throw e;
                 }
             }
         },
@@ -619,12 +636,12 @@ var fs = require('fs');
             this.getView(filePath, function (err, template) {
                 if (err) {
                     res.writeHead(500, {'Content-Type': 'text/html'});
-                    res.end(err.stack);
+                    res.end(err.message);
                 } else {
                     that.compile(template, model, function (err, html) {
                         if (err) {
                             res.writeHead(500, {'Content-Type': 'text/html'});
-                            res.end(err.stack);
+                            res.end(err.message);
                         } else {
                             res.writeHead(200, {'Content-Type': 'text/html'});
                             res.end(html);
