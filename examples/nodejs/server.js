@@ -1,11 +1,11 @@
 var http = require('http'),
     url = require('url'),
-    saber = require('../saber');
+    faber = require('../../faber');
 
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
     if(path === '/'){
-        saber.render(res, './demo/index.html', {
+        faber.render(res, './examples/nodejs/index.html', {
             code: 1,
             data: [{
                 name: 'Jack',

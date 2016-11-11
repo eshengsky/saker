@@ -571,7 +571,7 @@ var fs = require('fs');
         return contentHandler;
     };
 
-    var saber = {
+    var faber = {
         /**
          * 根据视图文件路径获取文件
          * @param filePath
@@ -607,9 +607,9 @@ var fs = require('fs');
                     })
                 }
                 fn += variables;
-                fn += 'var $$$saber_data$$$ = [], writeLiteral = function(code) { $$$saber_data$$$.push(code); }, write = function(code){ writeLiteral((code)); };';
+                fn += 'var $$$faber_data$$$ = [], writeLiteral = function(code) { $$$faber_data$$$.push(code); }, write = function(code){ writeLiteral((code)); };';
                 fn += content;
-                fn += ';return $$$saber_data$$$.join("");';
+                fn += ';return $$$faber_data$$$.join("");';
                 var html = (new Function('model', fn)(model));
                 if (typeof cb === 'function') {
                     cb(null, html);
@@ -652,5 +652,5 @@ var fs = require('fs');
         }
     };
 
-    module.exports = saber;
+    module.exports = faber;
 })();
