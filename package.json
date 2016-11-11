@@ -1,7 +1,7 @@
 {
   "name": "saber",
   "version": "1.0.0",
-  "description": "Template engine which is simple, powerfull and easy to use.",
+  "description": "Saber is an emplate engine for Node.js and browsers, it is simple, powerfull and easy to use.",
   "main": "saber.js",
   "scripts": {
     "test": "mocha test/test.js"
