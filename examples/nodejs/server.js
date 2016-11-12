@@ -5,11 +5,11 @@ var http = require('http'),
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
     if(path === '/'){
-        saker.render(res, './examples/nodejs/index.html', {
+        saker.render(res, './index.html', {
             code: 1,
             data: JSON.stringify({"name":"Sky","age":20}),
             title: 'saker',
-            layout: __dirname + '/layout.html'
+            layout: 'layout.html'
         });
     }else{
         res.writeHead(404);
@@ -17,4 +17,4 @@ var server = http.createServer(function (req, res) {
     }
 });
 server.listen(8001);
-console.info('Server is running on 8001 port, you can visit it with http://localhost:8001/');
+console.info('NodeJs server is running on 8001 port, you can visit it on http://localhost:8001/');

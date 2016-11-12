@@ -2,8 +2,31 @@
  * Created by Sky on 2016/11/1.
  */
 var fs = require('fs');
+var path = require('path');
+var express = require('express');
 
 (function () {
+    /**
+     * 配置项
+     * @type {{debug: boolean, defaultLayout: string}}
+     */
+    var configure = {
+        debug: true,
+        defaultLayout: 'main.html'
+    };
+
+    /**
+     * 模板读取结果缓存
+     * @type {{}}
+     */
+    var cacheTemplate = {};
+
+    /**
+     * 模板编译结果缓存
+     * @type {{}}
+     */
+    var cacheCompiled = {};
+
     /**
      * 读取状态枚举
      * @type {{client: number, server: number}}
@@ -614,18 +637,35 @@ var fs = require('fs');
 
     var saker = {
         /**
+         * 合并配置项
+         * @param passObj
+         */
+        config: function (passObj) {
+            for (var item in passObj) {
+                if (Object.prototype.hasOwnProperty.call(passObj, item)) {
+                    configure[item] = passObj[item];
+                }
+            }
+        },
+
+        /**
          * 根据视图文件路径获取文件
          * @param filePath
          * @param cb
          */
         getView: function (filePath, cb) {
-            fs.readFile(filePath, function (err, data) {
-                if (err) {
-                    cb(err);
-                } else {
-                    cb(null, data.toString('utf8'));
-                }
-            })
+            if (cacheTemplate[filePath]) {
+                cb(null, cacheTemplate[filePath]);
+            } else {
+                fs.readFile(filePath, function (err, data) {
+                    if (err) {
+                        cb(err);
+                    } else {
+                        cacheTemplate[filePath] = data.toString('utf8');
+                        cb(null, data.toString('utf8'));
+                    }
+                })
+            }
         },
 
         /**
@@ -638,7 +678,7 @@ var fs = require('fs');
             var content = contentProcessor.getContent();
             console.log('content start >>>>>>>>>>>>>>>>>>>');
             console.log(content);
-            console.log('content end <<<<<<<<<<<<<<<<<<<<');
+            console.log('content end <<<<<<<<<<<<<<<<<<<<\n\n');
             return function (model, cb) {
                 if (typeof model === 'function') {
                     cb = model;
@@ -674,7 +714,7 @@ var fs = require('fs');
                 fn += 'return $$$saker_data$$$.join("");\n';
                 console.log('fn start >>>>>>>>>>>>>>>>>>>');
                 console.log(fn);
-                console.log('fn end <<<<<<<<<<<<<<<<<<<<');
+                console.log('fn end <<<<<<<<<<<<<<<<<<<<\n\n');
                 var html = '';
                 setImmediate(function () {
                     try {
@@ -684,7 +724,7 @@ var fs = require('fs');
                         console.log('html end <<<<<<<<<<<<<<<<<<<<');
 
                         if (model.layout === undefined) {
-                            model.layout = './layout.html';
+                            model.layout = path.join(express().get('views'), configure.defaultLayout);
                         }
                         if (model.layout) {
                             that.getView(model.layout, function (err, layoutTemp) {
@@ -720,22 +760,54 @@ var fs = require('fs');
          */
         render: function (res, filePath, model) {
             var that = this;
-            this.getView(filePath, function (err, template) {
+            var callback = function (err, html) {
                 if (err) {
                     res.writeHead(500, {'Content-Type': 'text/html'});
                     res.end(err.message);
                 } else {
-                    that.compile(template)(model, function (err, html) {
-                        if (err) {
-                            res.writeHead(500, {'Content-Type': 'text/html'});
-                            res.end(err.message);
-                        } else {
-                            res.writeHead(200, {'Content-Type': 'text/html'});
-                            res.end(html);
-                        }
-                    });
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                    res.end(html);
                 }
-            })
+            };
+            if (cacheCompiled[filePath]) {
+                cacheCompiled[filePath](model, callback);
+            } else {
+                this.getView(filePath, function (err, template) {
+                    if (err) {
+                        res.writeHead(500, {'Content-Type': 'text/html'});
+                        res.end(err.message);
+                    } else {
+                        that.compile(template)(model, callback);
+                    }
+                })
+            }
+        },
+
+        /**
+         * express集成接口
+         * @param filePath
+         * @param model
+         * @param cb
+         */
+        express: function (filePath, model, cb) {
+            var callback = function (err, html) {
+                if (err) {
+                    return cb(err);
+                }
+                return cb(null, html);
+            };
+            if (cacheCompiled[filePath]) {
+                cacheCompiled[filePath](model, callback)
+            } else {
+                saker.getView(filePath, function (err, template) {
+                    if (err) {
+                        return cb(err);
+                    }
+                    var compiled = saker.compile(template);
+                    cacheCompiled[filePath] = compiled;
+                    compiled(model, callback);
+                })
+            }
         }
     };
 

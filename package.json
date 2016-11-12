@@ -24,6 +24,10 @@
   },
   "homepage": "https://github.com/eshengsky/saker#readme",
   "devDependencies": {
+    "body-parser": "~1.15.1",
+    "cookie-parser": "~1.4.3",
+    "express": "^4.14.0",
+    "debug": "~2.2.0",
     "mocha": "^3.1.2"
   }
 }
