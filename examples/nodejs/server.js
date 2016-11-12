@@ -1,13 +1,15 @@
 var http = require('http'),
     url = require('url'),
-    amber = require('../../amber');
+    saker = require('../../saker');
 
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
     if(path === '/'){
-        amber.render(res, './examples/nodejs/index.html', {
+        saker.render(res, './examples/nodejs/index.html', {
             code: 1,
-            data: JSON.stringify({"name":"Sky","age":20})
+            data: JSON.stringify({"name":"Sky","age":20}),
+            title: 'saker',
+            layout: __dirname + '/layout.html'
         });
     }else{
         res.writeHead(404);

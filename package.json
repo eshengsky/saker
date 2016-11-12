@@ -1,14 +1,14 @@
 {
-  "name": "AmberJs",
-  "version": "1.0.0",
-  "description": "AmberJs is a template engine for Node.js and browsers, it is lightweight, powerfull and easy to use.",
-  "main": "amber.js",
+  "name": "saker",
+  "version": "0.9.0",
+  "description": "Saker is a template engine for Node.js and browsers, it is lightweight, powerfull and easy to use.",
+  "main": "saker.js",
   "scripts": {
     "test": "mocha test/test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eshengsky/AmberJs.git"
+    "url": "git+https://github.com/eshengsky/saker.git"
   },
   "keywords": [
     "template",
@@ -20,9 +20,9 @@
   "author": "Sky",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/eshengsky/AmberJs/issues"
+    "url": "https://github.com/eshengsky/saker/issues"
   },
-  "homepage": "https://github.com/eshengsky/AmberJs#readme",
+  "homepage": "https://github.com/eshengsky/saker#readme",
   "devDependencies": {
     "mocha": "^3.1.2"
   }
