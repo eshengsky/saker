@@ -1,4 +1,5 @@
-# faber
-faber is a template engine for [Node.js](https://nodejs.org) and browsers, it is simple, powerfull and easy to use.
+# AmberJs
+AmberJs is a template engine for [Node.js](https://nodejs.org) and browsers, it is lightweight, powerfull and easy to use.
 
-[![Build Status](https://travis-ci.org/eshengsky/faber.svg?branch=master)](https://travis-ci.org/eshengsky/faber)
+[![Build Status](https://travis-ci.org/eshengsky/amberjs.svg?branch=master)](https://travis-ci.org/eshengsky/amber)
+[![NPM version](https://img.shields.io/npm/v/amberjs.svg?style=flat)](https://www.npmjs.com/package/amberjs)

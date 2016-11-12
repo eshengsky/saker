@@ -142,6 +142,49 @@ var fs = require('fs');
         }
     };
 
+    var innerHelper = {
+        /**
+         * 输出原生未转义的字符串，注意最终还需escapeHtml去处理
+         * @param val
+         * @returns {{str: *, $$$amber_raw$$$: boolean}}
+         */
+        raw: function (val) {
+            return {
+                str: val,
+                $$$amber_raw$$$: true
+            }
+        },
+
+        /**
+         * 转义特殊字符
+         * @param val
+         * @returns {XML|string|void|*}
+         */
+        escapeHtml: function (val) {
+            if (val === undefined || val === null) {
+                return '';
+            }
+            //接收到的是raw包装的字符串，则不转义
+            if (val.$$$amber_raw$$$) {
+                return val.str;
+            }
+            if (typeof val !== 'string') {
+                return val;
+            }
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+
+            return val.replace(/[&<>"']/g, function (m) {
+                return map[m];
+            });
+        }
+    };
+
     /**
      * 获取当前所在的行号、列号、该行的上一行和下两行
      * @returns {{row: Number, col: *, source: Array}}
@@ -267,12 +310,12 @@ var fs = require('fs');
             }
 
             //class="@name"   class="@arr.join('')"
-            if ((char === '"' || char === "'") && parseModel.brackets.length === 0){
+            if ((char === '"' || char === "'") && parseModel.brackets.length === 0) {
                 break;
             }
 
             //class="@name abc"   class="@arr.join(' ') abc"
-            if (char === ' ' && parseModel.brackets.length === 0){
+            if (char === ' ' && parseModel.brackets.length === 0) {
                 break;
             }
 
@@ -571,7 +614,7 @@ var fs = require('fs');
         return contentHandler;
     };
 
-    var faber = {
+    var amber = {
         /**
          * 根据视图文件路径获取文件
          * @param filePath
@@ -588,39 +631,44 @@ var fs = require('fs');
         },
 
         /**
-         * 根据给定模板字符串和视图模型编译生成最终html
+         * 根据给定模板字符串进行编译
          * @param template
-         * @param model
-         * @param cb
          */
-        compile: function (template, model, cb) {
-            try {
-                console.info(template)
-                var contentHandler = parse(template);
-                var content = contentHandler.getContent();
-                console.log(content);
-                var fn = '';
-                var variables = '';
-                if (typeof model === 'object') {
-                    Object.keys(model).forEach(function (item) {
-                        variables += 'var ' + item + ' = model.' + item + ';';
-                    })
+        compile: function (template) {
+            var contentHandler = parse(template);
+            var content = contentHandler.getContent();
+            console.log(content);
+            return function (model, cb) {
+                if (typeof model === 'function') {
+                    cb = model;
+                    model = {};
                 }
-                fn += variables;
-                fn += 'var $$$faber_data$$$ = [], writeLiteral = function(code) { $$$faber_data$$$.push(code); }, write = function(code){ writeLiteral((code)); };';
-                fn += content;
-                fn += ';return $$$faber_data$$$.join("");';
-                var html = (new Function('model', fn)(model));
-                if (typeof cb === 'function') {
+                try {
+                    var fn = '';
+                    var variables = '';
+                    var thisObj = {
+                        model: model,
+                        raw: innerHelper.raw,
+                        escapeHtml: innerHelper.escapeHtml
+                    };
+                    variables += 'var amber = {};';
+                    Object.keys(thisObj).forEach(function (item) {
+                        variables += 'amber.' + item + ' = this.' + item + ';';
+                    });
+                    if (typeof model === 'object' && Object.keys(model).length > 0) {
+                        Object.keys(model).forEach(function (item) {
+                            variables += 'var ' + item + ' = model.' + item + ';';
+                        })
+                    }
+                    fn += variables;
+                    fn += 'var $$$amber_data$$$ = [], writeLiteral = function(code) { $$$amber_data$$$.push(code); }, write = function(code){ writeLiteral((amber.escapeHtml(code))); };';
+                    fn += content;
+                    fn += ';return $$$amber_data$$$.join("");';
+                    console.log(fn);
+                    var html = new Function('model', fn).call(thisObj, model);
                     cb(null, html);
-                } else {
-                    return html;
-                }
-            } catch (e) {
-                if (typeof cb === 'function') {
-                    cb(e);
-                } else {
-                    throw e;
+                } catch (err) {
+                    cb(err);
                 }
             }
         },
@@ -638,7 +686,7 @@ var fs = require('fs');
                     res.writeHead(500, {'Content-Type': 'text/html'});
                     res.end(err.message);
                 } else {
-                    that.compile(template, model, function (err, html) {
+                    that.compile(template)(model, function (err, html) {
                         if (err) {
                             res.writeHead(500, {'Content-Type': 'text/html'});
                             res.end(err.message);
@@ -646,11 +694,11 @@ var fs = require('fs');
                             res.writeHead(200, {'Content-Type': 'text/html'});
                             res.end(html);
                         }
-                    })
+                    });
                 }
             })
         }
     };
 
-    module.exports = faber;
+    module.exports = amber;
 })();

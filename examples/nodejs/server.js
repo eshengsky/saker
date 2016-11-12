@@ -1,19 +1,13 @@
 var http = require('http'),
     url = require('url'),
-    faber = require('../../faber');
+    amber = require('../../amber');
 
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
     if(path === '/'){
-        faber.render(res, './examples/nodejs/index.html', {
+        amber.render(res, './examples/nodejs/index.html', {
             code: 1,
-            data: [{
-                name: 'Jack',
-                age: 20
-            },{
-                name: 'Kathy',
-                age: 18
-            }]
+            data: JSON.stringify({"name":"Sky","age":20})
         });
     }else{
         res.writeHead(404);
