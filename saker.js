@@ -523,6 +523,7 @@ var express = require('express');
                 if (nextChar === '@') {
                     processor.position++;
                     nextChar = processor.readNextChars(1);
+                    //@@
                     if (nextChar === '@') {
                         processor.position++;
                         processor.state = stateEnum.client; //准备进入前端读取模式
@@ -530,21 +531,45 @@ var express = require('express');
                             data: '@',
                             type: modeEnum.markup
                         });
-                    } else if (nextChar === '"' || nextChar === "'") {
+                    }
+                    //@//...
+                    else if (nextChar === '/' && processor.readNextChars(2) === '//') {
+                        matchedText = processor.readNextChars().match(/\/\/.*/)[0];
+                        processor.position += matchedText.length;
+                        processor.state = stateEnum.client;
+                    }
+                    //@*...*@
+                    else if (nextChar === '*') {
+                        if (/\*[\s\S]*?\*@/.test(processor.readNextChars())) {
+                            matchedText = processor.readNextChars().match(/\*[\s\S]*?\*@/)[0];
+                            processor.position += matchedText.length;
+                            processor.state = stateEnum.client;
+                        } else {
+                            throw '后端块状注释 @* 找不到对应的 *@ 结尾！';
+                        }
+                    }
+                    //@' @"
+                    else if (nextChar === '"' || nextChar === "'") {
                         throw '引号在代码块开头无效。只有标识符、关键字、注释、“(”和“{”才有效。';
-                    } else if (nextChar === '(') {
+                    }
+                    //@(...)
+                    else if (nextChar === '(') {
                         code = processor.readBracketCode();
                         contentProcessor.addSegment({
                             data: code,
                             type: modeEnum.expression
                         });
-                    } else if (nextChar === '{') {
+                    }
+                    //@{...}
+                    else if (nextChar === '{') {
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
                             data: code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === 'i' && processor.readNextChars(2) === 'if' && /^if\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
+                    }
+                    //@if(){...}
+                    else if (nextChar === 'i' && processor.readNextChars(2) === 'if' && /^if\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^if\s*?\([\s\S]+?\)\s*\{/)[0];
                         processor.position += matchedText.length;
                         processor.braces.push({
@@ -556,7 +581,9 @@ var express = require('express');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === 'f' && processor.readNextChars(3) === 'for' && /^for\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
+                    }
+                    //@for(){...}
+                    else if (nextChar === 'f' && processor.readNextChars(3) === 'for' && /^for\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^for\s*?\([\s\S]+?\)\s*\{/)[0];
                         processor.position += matchedText.length;
                         processor.braces.push({
@@ -568,7 +595,9 @@ var express = require('express');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === 'w' && processor.readNextChars(5) === 'while' && /^while\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
+                    }
+                    //@while(){...}
+                    else if (nextChar === 'w' && processor.readNextChars(5) === 'while' && /^while\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^while\s*?\([\s\S]+?\)\s*\{/)[0];
                         processor.position += matchedText.length;
                         processor.braces.push({
@@ -580,7 +609,9 @@ var express = require('express');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === 'd' && processor.readNextChars(2) === 'do' && /^do\s*?\{/.test(processor.readNextChars())) {
+                    }
+                    //@do{}
+                    else if (nextChar === 'd' && processor.readNextChars(2) === 'do' && /^do\s*?\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^do\s*?\{/)[0];
                         processor.position += matchedText.length;
                         processor.braces.push({
@@ -592,7 +623,9 @@ var express = require('express');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === 's' && processor.readNextChars(6) === 'switch' && /^switch\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
+                    }
+                    //@switch(){...}
+                    else if (nextChar === 's' && processor.readNextChars(6) === 'switch' && /^switch\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^switch\s*?\([\s\S]+?\)\s*\{/)[0];
                         processor.position += matchedText.length;
                         processor.braces.push({
@@ -604,7 +637,9 @@ var express = require('express');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else if (nextChar === 't' && processor.readNextChars(3) === 'try' && /^try\s*?\{/.test(processor.readNextChars())) {
+                    }
+                    //@try{}
+                    else if (nextChar === 't' && processor.readNextChars(3) === 'try' && /^try\s*?\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^try\s*?\{/)[0];
                         processor.position += matchedText.length;
                         processor.braces.push({
@@ -616,7 +651,9 @@ var express = require('express');
                             data: matchedText + code,
                             type: modeEnum.script
                         });
-                    } else {
+                    }
+                    //@abc
+                    else {
                         code = processor.readLineServerCode();
                         contentProcessor.addSegment({
                             data: code,
@@ -720,7 +757,12 @@ var express = require('express');
                 var html = '';
                 setImmediate(function () {
                     try {
+                        //eval处理js代码
                         html = new Function('model', fn).call(thisObj, model);
+                        //过滤<text>标签
+                        html = html.replace(/<text>([\s\S]*?)<\/text>/g, function (a, b) {
+                            return b;
+                        });
                         console.log('html start >>>>>>>>>>>>>>>>>>>');
                         console.log(html);
                         console.log('html end <<<<<<<<<<<<<<<<<<<<');
