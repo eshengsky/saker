@@ -499,6 +499,31 @@ var express;
         },
 
         /**
+         * 反转义特殊字符
+         * @param val
+         * @returns {XML|string|void|*}
+         */
+        unescapeHtml: function (val) {
+            if (val === undefined || val === null) {
+                return '';
+            }
+            if (typeof val !== 'string') {
+                return val;
+            }
+            var map = {
+                '&amp;': '&',
+                '&lt;': '<',
+                '&gt;': '>',
+                '&quot;': '"',
+                "&#039;": "'"
+            };
+
+            return val.replace(/&amp;|&lt;|&gt;|&quot;|&#039;/g, function (m) {
+                return map[m];
+            });
+        },
+
+        /**
          * 加载局部视图
          * @param filePath
          * @param model
@@ -510,8 +535,11 @@ var express;
             }
             filePath = path.join(configure.partialViewDir, filePath);
             var partialTemp = saker.getView(filePath);
+            var layout = model.layout;
             model.layout = null;
-            return innerHelper.raw(saker.compile(partialTemp)(model));
+            var html = saker.compile(partialTemp)(model);
+            model.layout = layout;
+            return html;
         }
     };
 
@@ -782,9 +810,6 @@ var express;
                 //处理renderBody
                 fn = fn.replace(/saker\.renderBody\(\)/g, '$saker_write$(saker.renderBody())');
                 fn += 'return $saker_data$.join("");\n';
-                console.log('fn start >>>>>>>>>>>>>>>>>>>');
-                console.log(fn);
-                console.log('fn end <<<<<<<<<<<<<<<<<<<<\n\n');
 
                 if(cb){
                     //异步方式
