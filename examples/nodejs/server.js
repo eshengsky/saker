@@ -9,7 +9,7 @@ var server = http.createServer(function (req, res) {
             code: 1,
             data: JSON.stringify({"name":"Sky","age":20}),
             title: 'saker',
-            layout: 'layout.html'
+            layout: './examples/nodejs/layout.html'
         });
     }else{
         res.writeHead(404);

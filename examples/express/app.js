@@ -3,7 +3,8 @@ var path = require('path');
 var routes = require('./routes/index');
 var saker = require('../../saker');
 saker.config({
-    defaultLayout: 'layout.html'
+    defaultLayout: 'layout.html',
+    partialViewDir: './views/partials'
 });
 
 var app = express();

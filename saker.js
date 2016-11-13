@@ -3,7 +3,7 @@
  */
 var fs = require('fs');
 var path = require('path');
-var express = require('express');
+var express;
 
 (function () {
     /**
@@ -12,7 +12,8 @@ var express = require('express');
      */
     var configure = {
         debug: true,
-        defaultLayout: 'main.html'
+        defaultLayout: 'main.html',
+        partialViewDir: './views/partials/'
     };
 
     /**
@@ -495,6 +496,22 @@ var express = require('express');
             return val.replace(/[&<>"']/g, function (m) {
                 return map[m];
             });
+        },
+
+        /**
+         * 加载局部视图
+         * @param filePath
+         * @param model
+         * @returns {*}
+         */
+        renderPartial: function (filePath, model) {
+            if(filePath.indexOf('.') === -1){
+                filePath += '.html';
+            }
+            filePath = path.join(configure.partialViewDir, filePath);
+            var partialTemp = saker.getView(filePath);
+            model.layout = null;
+            return innerHelper.raw(saker.compile(partialTemp)(model));
         }
     };
 
@@ -692,16 +709,30 @@ var express = require('express');
          */
         getView: function (filePath, cb) {
             if (cacheTemplate[filePath]) {
-                cb(null, cacheTemplate[filePath]);
+                if(cb){
+                    cb(null, cacheTemplate[filePath]);
+                }else{
+                    return cacheTemplate[filePath];
+                }
             } else {
-                fs.readFile(filePath, function (err, data) {
-                    if (err) {
-                        cb(err);
-                    } else {
-                        cacheTemplate[filePath] = data.toString('utf8');
-                        cb(null, data.toString('utf8'));
+                if(cb){
+                    fs.readFile(filePath, function (err, data) {
+                        if (err) {
+                            cb(err);
+                        } else {
+                            cacheTemplate[filePath] = data.toString('utf8');
+                            cb(null, data.toString('utf8'));
+                        }
+                    })
+                }else{
+                    try{
+                        var data = fs.readFileSync(filePath);
+                    }catch(err){
+                        throw err;
                     }
-                })
+                    cacheTemplate[filePath] = data.toString('utf8');
+                    return data.toString('utf8');
+                }
             }
         },
 
@@ -721,7 +752,6 @@ var express = require('express');
                     cb = model;
                     model = {};
                 }
-
                 var fn = '';
                 var variables = '';
                 var thisObj = {
@@ -729,7 +759,8 @@ var express = require('express');
                     raw: innerHelper.raw,
                     renderBody: function () {
                         return innerHelper.raw(model.$saker_body$);
-                    }
+                    },
+                    renderPartial: innerHelper.renderPartial
                 };
                 //将 this.xxx 赋到 saker.xxx 上
                 variables += 'var saker = {};\n';
@@ -754,11 +785,17 @@ var express = require('express');
                 console.log('fn start >>>>>>>>>>>>>>>>>>>');
                 console.log(fn);
                 console.log('fn end <<<<<<<<<<<<<<<<<<<<\n\n');
-                var html = '';
-                setImmediate(function () {
-                    try {
-                        //eval处理js代码
-                        html = new Function('model', fn).call(thisObj, model);
+
+                if(cb){
+                    //异步方式
+                    setImmediate(function () {
+                        var html = '';
+                        try {
+                            //eval处理js代码
+                            html = new Function('model', fn).call(thisObj, model);
+                        } catch (err) {
+                            return cb(err);
+                        }
                         //过滤<text>标签
                         html = html.replace(/<text>([\s\S]*?)<\/text>/g, function (a, b) {
                             return b;
@@ -768,13 +805,21 @@ var express = require('express');
                         console.log('html end <<<<<<<<<<<<<<<<<<<<');
 
                         if (model.layout === undefined) {
-                            model.layout = path.join(express().get('views'), configure.defaultLayout);
+                            model.layout = configure.defaultLayout;
                         }
                         if (model.layout) {
+                            if (express) {
+                                model.layout = path.join(express().get('views'), model.layout);
+                            } else {
+                                model.layout = path.join(__dirname, model.layout);
+                            }
                             that.getView(model.layout, function (err, layoutTemp) {
                                 if (err) {
                                     cb(err);
                                 } else {
+                                    if (layoutTemp.indexOf('saker.renderBody()') === -1) {
+                                        return cb(new Error('layout模板中找不到saker.renderBody()方法！'));
+                                    }
                                     model.layout = null;
                                     model.$saker_body$ = html;
                                     that.compile(layoutTemp)(model, function (err, layoutHtml) {
@@ -789,10 +834,45 @@ var express = require('express');
                         } else {
                             cb(null, html);
                         }
+
+                    });
+                }else{
+                    //同步方式
+                    var html = '';
+                    try {
+                        //eval处理js代码
+                        html = new Function('model', fn).call(thisObj, model);
                     } catch (err) {
-                        cb(err);
+                        throw err;
                     }
-                });
+                    //过滤<text>标签
+                    html = html.replace(/<text>([\s\S]*?)<\/text>/g, function (a, b) {
+                        return b;
+                    });
+                    console.log('html start >>>>>>>>>>>>>>>>>>>');
+                    console.log(html);
+                    console.log('html end <<<<<<<<<<<<<<<<<<<<');
+
+                    if (model.layout === undefined) {
+                        model.layout = configure.defaultLayout;
+                    }
+                    if (model.layout) {
+                        if (express) {
+                            model.layout = path.join(express().get('views'), model.layout);
+                        } else {
+                            model.layout = path.join(__dirname, model.layout);
+                        }
+                        var layoutTemp = that.getView(model.layout);
+                        if (layoutTemp.indexOf('saker.renderBody()') === -1) {
+                            throw 'layout模板中找不到saker.renderBody()方法！';
+                        }
+                        model.layout = null;
+                        model.$saker_body$ = html;
+                        return that.compile(layoutTemp)(model);
+                    } else {
+                        return html;
+                    }
+                }
             }
         },
 
@@ -834,6 +914,7 @@ var express = require('express');
          * @param cb
          */
         express: function (filePath, model, cb) {
+            express = require('express');
             var callback = function (err, html) {
                 if (err) {
                     return cb(err);
