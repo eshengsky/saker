@@ -529,7 +529,7 @@ var express;
          * @param model
          * @returns {*}
          */
-        renderPartial: function (filePath, model) {
+        renderPartialFn: function (filePath, model) {
             if(filePath.indexOf('.') === -1){
                 filePath += '.html';
             }
@@ -785,10 +785,10 @@ var express;
                 var thisObj = {
                     model: model,
                     raw: innerHelper.raw,
-                    renderBody: function () {
-                        return innerHelper.raw(model.$saker_body$);
+                    renderBodyFn: function () {
+                        return model.$saker_body$;
                     },
-                    renderPartial: innerHelper.renderPartial
+                    renderPartialFn: innerHelper.renderPartialFn
                 };
                 //将 this.xxx 赋到 saker.xxx 上
                 variables += 'var saker = {};\n';
@@ -805,10 +805,13 @@ var express;
                 fn += 'var $saker_escapeHtml$ = ' + innerHelper.escapeHtml.toString() + ';\n';
                 //定义write、writeLiteral
                 fn += 'var $saker_data$ = [],\n $saker_writeLiteral$ = function(code) { $saker_data$.push(code); },\n $saker_write$ = function(code){ $saker_writeLiteral$(($saker_escapeHtml$(code))); };\n';
+                //定义renderPartial，引用外部的renderPartialFn方法
+                fn += 'this.renderPartial = saker.renderPartial = function(filePath, model){$saker_data$.push(this.renderPartialFn(filePath, model));};\n';
+                fn += 'this.renderBody = saker.renderBody = function(){$saker_data$.push(this.renderBodyFn());};\n';
                 //附加解析后的脚本
                 fn += content + '\n';
                 //处理renderBody
-                fn = fn.replace(/saker\.renderBody\(\)/g, '$saker_write$(saker.renderBody())');
+                //fn = fn.replace(/saker\.renderBody\(\)/g, '$saker_write$(saker.renderBody())');
                 fn += 'return $saker_data$.join("");\n';
 
                 if(cb){
