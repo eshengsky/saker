@@ -434,10 +434,10 @@ var express = require('express');
             if (obj.data) {
                 switch (obj.type) {
                     case 0:
-                        this.segments.push('$$$saker_writeLiteral$$$("' + this.escape(obj.data) + '");');
+                        this.segments.push('$saker_writeLiteral$("' + this.escape(obj.data) + '");');
                         break;
                     case 1:
-                        this.segments.push('$$$saker_write$$$(' + obj.data + ');');
+                        this.segments.push('$saker_write$(' + obj.data + ');');
                         break;
                     case 2:
                         this.segments.push(obj.data);
@@ -459,12 +459,12 @@ var express = require('express');
         /**
          * 输出原生未转义的字符串，注意最终还需escapeHtml去处理
          * @param val
-         * @returns {{str: *, $$$saker_raw$$$: boolean}}
+         * @returns {{str: *, $saker_raw$: boolean}}
          */
         raw: function (val) {
             return {
                 str: val,
-                $$$saker_raw$$$: true
+                $saker_raw$: true
             }
         },
 
@@ -478,7 +478,7 @@ var express = require('express');
                 return '';
             }
             //接收到的是raw包装的字符串，则不转义
-            if (val.$$$saker_raw$$$) {
+            if (val.$saker_raw$) {
                 return val.str;
             }
             if (typeof val !== 'string') {
@@ -546,10 +546,10 @@ var express = require('express');
                         });
                     } else if (nextChar === 'i' && processor.readNextChars(2) === 'if' && /^if\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^if\s*?\([\s\S]+?\)\s*\{/)[0];
-                        this.position += matchedText.length;
-                        this.braces.push({
+                        processor.position += matchedText.length;
+                        processor.braces.push({
                             type: bracesEnum.atIf,
-                            position: this.position
+                            position: processor.position
                         });
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
@@ -558,10 +558,10 @@ var express = require('express');
                         });
                     } else if (nextChar === 'f' && processor.readNextChars(3) === 'for' && /^for\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^for\s*?\([\s\S]+?\)\s*\{/)[0];
-                        this.position += matchedText.length;
-                        this.braces.push({
+                        processor.position += matchedText.length;
+                        processor.braces.push({
                             type: bracesEnum.atFor,
-                            position: this.position
+                            position: processor.position
                         });
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
@@ -570,10 +570,10 @@ var express = require('express');
                         });
                     } else if (nextChar === 'w' && processor.readNextChars(5) === 'while' && /^while\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^while\s*?\([\s\S]+?\)\s*\{/)[0];
-                        this.position += matchedText.length;
-                        this.braces.push({
+                        processor.position += matchedText.length;
+                        processor.braces.push({
                             type: bracesEnum.atWhile,
-                            position: this.position
+                            position: processor.position
                         });
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
@@ -582,10 +582,10 @@ var express = require('express');
                         });
                     } else if (nextChar === 'd' && processor.readNextChars(2) === 'do' && /^do\s*?\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^do\s*?\{/)[0];
-                        this.position += matchedText.length;
-                        this.braces.push({
+                        processor.position += matchedText.length;
+                        processor.braces.push({
                             type: bracesEnum.atDo,
-                            position: this.position
+                            position: processor.position
                         });
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
@@ -594,10 +594,10 @@ var express = require('express');
                         });
                     } else if (nextChar === 's' && processor.readNextChars(6) === 'switch' && /^switch\s*?\([\s\S]+?\)\s*\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^switch\s*?\([\s\S]+?\)\s*\{/)[0];
-                        this.position += matchedText.length;
-                        this.braces.push({
+                        processor.position += matchedText.length;
+                        processor.braces.push({
                             type: bracesEnum.atSwitch,
-                            position: this.position
+                            position: processor.position
                         });
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
@@ -606,10 +606,10 @@ var express = require('express');
                         });
                     } else if (nextChar === 't' && processor.readNextChars(3) === 'try' && /^try\s*?\{/.test(processor.readNextChars())) {
                         matchedText = processor.readNextChars().match(/^try\s*?\{/)[0];
-                        this.position += matchedText.length;
-                        this.braces.push({
+                        processor.position += matchedText.length;
+                        processor.braces.push({
                             type: bracesEnum.atTry,
-                            position: this.position
+                            position: processor.position
                         });
                         code = processor.readBlockServerCode();
                         contentProcessor.addSegment({
@@ -691,7 +691,7 @@ var express = require('express');
                     model: model,
                     raw: innerHelper.raw,
                     renderBody: function () {
-                        return innerHelper.raw(model.$$$saker_body$$$);
+                        return innerHelper.raw(model.$saker_body$);
                     }
                 };
                 //将 this.xxx 赋到 saker.xxx 上
@@ -702,16 +702,18 @@ var express = require('express');
                 //允许将 @model.name 简写为 @name
                 if (typeof model === 'object' && Object.keys(model).length > 0) {
                     Object.keys(model).forEach(function (item) {
-                        variables += 'var ' + item + ' = this.model.' + item + ';\n';
+                        variables += 'var ' + item + ' = model.' + item + ';\n';
                     })
                 }
                 fn += variables;
-                fn += 'var $$$saker_escapeHtml$$$ = ' + innerHelper.escapeHtml.toString() + ';\n';
+                fn += 'var $saker_escapeHtml$ = ' + innerHelper.escapeHtml.toString() + ';\n';
                 //定义write、writeLiteral
-                fn += 'var $$$saker_data$$$ = [],\n $$$saker_writeLiteral$$$ = function(code) { $$$saker_data$$$.push(code); },\n $$$saker_write$$$ = function(code){ $$$saker_writeLiteral$$$(($$$saker_escapeHtml$$$(code))); };\n';
+                fn += 'var $saker_data$ = [],\n $saker_writeLiteral$ = function(code) { $saker_data$.push(code); },\n $saker_write$ = function(code){ $saker_writeLiteral$(($saker_escapeHtml$(code))); };\n';
                 //附加解析后的脚本
                 fn += content + '\n';
-                fn += 'return $$$saker_data$$$.join("");\n';
+                //处理renderBody
+                fn = fn.replace(/saker\.renderBody\(\)/g, '$saker_write$(saker.renderBody())');
+                fn += 'return $saker_data$.join("");\n';
                 console.log('fn start >>>>>>>>>>>>>>>>>>>');
                 console.log(fn);
                 console.log('fn end <<<<<<<<<<<<<<<<<<<<\n\n');
@@ -732,7 +734,7 @@ var express = require('express');
                                     cb(err);
                                 } else {
                                     model.layout = null;
-                                    model.$$$saker_body$$$ = html;
+                                    model.$saker_body$ = html;
                                     that.compile(layoutTemp)(model, function (err, layoutHtml) {
                                         if (err) {
                                             cb(err);
