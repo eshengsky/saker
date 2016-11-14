@@ -3,7 +3,7 @@
  */
 'use strict';
 var assert = require('assert'),
-    saker = require('../saker');
+    saker = require('../');
 
 describe('【saker解析测试用例。saker analysis test cases.】', function () {
     describe('简单情况。Simple cases.', function () {

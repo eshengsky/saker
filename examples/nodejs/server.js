@@ -1,6 +1,6 @@
 var http = require('http'),
     url = require('url'),
-    saker = require('../../saker');
+    saker = require('../../');
 
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
@@ -9,7 +9,7 @@ var server = http.createServer(function (req, res) {
             code: 1,
             data: JSON.stringify({"name":"Sky","age":20}),
             title: 'saker',
-            layout: './examples/nodejs/layout.html'
+            layout: './layout.html'
         });
     }else{
         res.writeHead(404);
