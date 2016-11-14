@@ -4,8 +4,10 @@
 'use strict';
 var assert = require('assert'),
     saker = require('../');
-
-describe('【saker解析测试用例。saker analysis test cases.】', function () {
+saker.config({
+    debug: true
+});
+describe('【saker测试用例。saker test cases.】', function () {
     describe('简单情况。Simple cases.', function () {
         it('空字符串。Empty string.', function (done) {
             var expected = '';
@@ -231,10 +233,120 @@ describe('【saker解析测试用例。saker analysis test cases.】', function 
                 assert.equal(actual, expected);
                 done();
             });
-        })
+        });
+
+        it('"@{}"块状代码。"@{}" block code.', function (done) {
+            var expected = '<div>hello</div><div>saker</div>saker!';
+            saker.compile('<div>hello</div>@{var name = "saker"; <div>@name</div>}saker!')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"@if"代码块。"@if" block code.', function (done) {
+            var expected = '<div>saker</div>';
+            saker.compile('@if(true){<div>saker</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"else if"代码块。"else if" block code.', function (done) {
+            var expected = '<div>other</div>';
+            saker.compile('@if(false){<div>some</div>}else if(true){<div>other</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"else"代码块。"else" block code.', function (done) {
+            var expected = '<div>other</div>';
+            saker.compile('@if(false){<div>some</div>}else{<div>other</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"for"代码块。"for" block code.', function (done) {
+            var expected = '<div>0</div><div>1</div>';
+            saker.compile('@for(var i=0;i<=1;i++){<div>@i</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"while"代码块。"while" block code.', function (done) {
+            var expected = '<div>1</div><div>0</div>';
+            saker.compile('@{var i = 1;}@while(i>=0){<div>@i</div>i--;}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"do"代码块。"do" block code.', function (done) {
+            var expected = '<div>1</div><div>0</div>';
+            saker.compile('@{var i = 1;}@do{<div>@i</div>i--;}while(i>=0)')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"switch"代码块。"switch" block code.', function (done) {
+            var expected = '<div>1</div>';
+            saker.compile('@{var flag=1;}@switch(flag){case 0:<div>0</div>case 1:<div>1</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"try catch"代码块。"try catch" block code.', function (done) {
+            var expected = '<div>err</div>';
+            saker.compile('@try{JSON.parse();}catch(e){<div>err</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"finally"代码块。"finally" block code.', function (done) {
+            var expected = '<div>err</div><div>end</div>';
+            saker.compile('@try{JSON.parse();}catch(e){<div>err</div>}finally{<div>end</div>}')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
     });
 
-    describe('特殊字符的处理。Special characters process.', function () {
+    describe('特殊情况。Special cases.', function () {
         it('HTML中包含特殊字符。Exists special characters in HTML.', function (done) {
             var expected = '1 > 0 and 0 < 1 is a fact!';
             saker.compile('1 > 0 and 0 < 1 is a fact!')({
@@ -249,6 +361,17 @@ describe('【saker解析测试用例。saker analysis test cases.】', function 
         it('脚本字符串中包含特殊字符。Exists special characters in script string.', function (done) {
             var expected = '<div class="a&lt;b"></div>';
             saker.compile('@{var a = "a<b";}<div class="@a"></div>')({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('输出@符号。Output @.', function (done) {
+            var expected = 'eshengsky@163.com';
+            saker.compile('eshengsky@@163.com')({
                 layout: null
             }, function (err, actual) {
                 if (err) return done(err);
