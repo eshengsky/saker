@@ -28,7 +28,6 @@ $ npm install saker
     @if (code === 1) {
         <ul>
             @{
-                @// here data is product array
                 data.forEach(function(item){
                     <li>
                         <a href="@item.href">@item.productName</a>
