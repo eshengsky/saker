@@ -42,7 +42,7 @@ This is a very simple and representative sample, it shows a name list when code 
         <ul>
             @{
                 data.forEach(function(item) {
-                    <li class="@(item.gender === 'female' ? 'pink' ? '')">
+                    <li class="@(item.gender === 'female' ? 'pink' : '')">
                         <a href="/details/@item.id">@item.name</a>
                     </li>
                 });
