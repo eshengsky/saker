@@ -1,4 +1,6 @@
+@{this.layout = 'layout';}
+
 <h5>@greeting!</h5>
 <article>
-    @saker.renderPartial('index_partial', model)
+    @this.renderPartial('index_partial', model)
 </article>

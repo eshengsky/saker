@@ -4,8 +4,7 @@ var router = express.Router();
 router.get('/', function (req, res) {
 	var model = {
 		greeting: 'Hello Saker',
-		title: 'saker',
-		layout: 'layout.html'
+		title: 'saker'
 	};
 	res.render('index', model);
 });
