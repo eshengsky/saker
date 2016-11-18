@@ -1,4 +1,18 @@
-<div>body</div>
-<script>
-    var data = '@(this.raw(data))';
-</script>
+@{ this.layout = './layout.html' }
+
+<h2>Name List</h2>
+<article>
+    @if(code === 1) {
+        <ul>
+            @{
+                data.forEach(function(person) {
+                    <li class="@(person.gender === 'female' ? 'pink' : '')">
+                        <a href="/details/@person.id">@person.name</a>
+                    </li>
+                });
+            }
+        </ul>
+    } else {
+        <p>Sorry, no data!</p>
+    }
+</article>
