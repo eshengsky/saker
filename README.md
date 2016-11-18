@@ -92,7 +92,7 @@ The following is quick reference:
 |Server-side comment            |@// This is inline comment<br><br>@* <br>&nbsp;&nbsp;&nbsp;&nbsp;Here's a Saker server-side multi-line comment<br>&nbsp;&nbsp;&nbsp;&nbsp;It won't be rendered to the browser<br> *@|If you need to, you can easily write Saker comments in your code. They are a great alternative to HTML comments, *because the Saker comments won't be included in the output to the browser*.|
 |Output @                       |eshengsky@@163.com|Double @ will output the symbol @.|
 |Layout                         |@this.renderBody()|In layout view, you can use renderBody function to render a body view.|
-|Partial                        |@this.renderPartial('my_partial', model)|In a view, you can use renderPartial to render a partial view.|
+|Partial                        |@this.renderPartial('my_partial')|In a view, you can use renderPartial to render a partial view.|
 
 ## Test
 

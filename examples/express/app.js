@@ -8,7 +8,7 @@ saker.config({
 });
 
 var app = express();
-app.engine('html', saker.express);
+app.engine('html', saker._express);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'html');
 
