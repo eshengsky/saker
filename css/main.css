@@ -1,0 +1,23 @@
+body {
+    font-size: 14px;
+}
+
+.index-container {
+    margin-top: 90px;
+}
+
+.content-container {
+    margin-top: 100px;
+}
+
+.demo-pre pre {
+    min-height: 300px;
+}
+
+.demo-pre pre#resultArea{
+    border-color: #4caf50;
+}
+
+.demo-pre pre#resultArea.err{
+    border-color: #e51c23;
+}

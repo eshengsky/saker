@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Saker browser demo</title>
+</head>
+<body>
+<div id="container"></div>
+<script src="../../lib/saker.js"></script>
+<script type="saker-template" id="temp">
+    @// This is template, the 'script' tag need type attribute
+    <h3>@title</h3>
+    <ul>
+        @{
+            data.forEach(function(item){
+                <li>@item</li>
+            });
+        }
+    </ul>
+</script>
+<script src="index.js"></script>
+</body>
+</html>

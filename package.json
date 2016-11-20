@@ -1,0 +1,17 @@
+{
+  "name": "saker_pages",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^2.2.4",
+    "prismjs": "^1.5.1",
+    "saker": "^0.9.3"
+  }
+}

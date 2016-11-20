@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Saker by Sky</title>
+    <link rel="stylesheet" href="./css/bootstrap-paper.css">
+    <link rel="stylesheet" href="./node_modules/prismjs/themes/prism.css">
+    <link rel="stylesheet" href="./css/main.css">
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+                <span>Saker</span>
+            </a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav my-nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="./">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./live-demo.html">Live Demo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./getting-started.html">Getting Started</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="./syntax.html">Syntax Reference <span
+                            class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./api.html">API Reference</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/eshengsky/saker">Github</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="content-container">
+        <h3>Syntax Reference</h3>
+        <h4>Rendering HTML</h4>
+        <p>The default Saker template language is HTML. Rendering HTML from Saker is no different than in an HTML file. A Saker template file with the following markup:</p>
+        <pre><code class="language-html">&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
+        <p>Is rendered unchanged as <code>&lt;p&gt;Hello World&lt;/p&gt;</code> by the server.</p>
+        <h4>Saker syntax</h4>
+        <p>Saker uses the @ symbol to transition from HTML to JavaScript. Saker evaluates JavaScript expressions and renders them in the HTML output.</p>
+        <p>HTML containing @ symbols may need to be escaped with a second @ symbol. For example:</p>
+        <pre><code class="language-html">&lt;p&gt;eshengsky@@163.com&lt;/p&gt;</code></pre>
+        <p>would render the following HTML:</p>
+        <pre><code class="language-html">&lt;p&gt;eshengsky@163.com&lt;/p&gt;</code></pre>
+        <h4>Implicit expressions</h4>
+        <p>Implicit Saker expressions start with @ followed by JavaScript code. For example:</p>
+        <pre><code class="language-html">&lt;p&gt;@JSON.parse("true")&lt;/p&gt;</code></pre>
+        <h4>Explicit expressions</h4>
+        <p>Explicit Saker expressions consists of an @ symbol with balanced parenthesis. For example, to render the locale date info:</p>
+        <pre><code class="language-html">&lt;p&gt;@(new Date().toLocaleString())&lt;/p&gt;</code></pre>
+        <p>Any content within the @() parenthesis is evaluated and rendered to the output.</p>
+        <p>Implicit expressions generally cannot contain spaces. For example:</p>
+        <pre><code class="language-html">&lt;p&gt;@1 + 1&lt;/p&gt;</code></pre>
+        <p>Which renders the following HTML:</p>
+        <pre><code class="language-html">&lt;p&gt;1 + 1&lt;/p&gt;</code></pre>
+        <h4>Expression encoding</h4>
+        <p>JavaScript expressions that evaluate to a string are HTML encoded. For example, the following Saker markup:</p>
+        <pre><code class="language-html">@(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)</code></pre>
+        <p>Renders this HTML:</p>
+        <pre><code class="language-html">&amp;lt;span&amp;gt;Hello World&amp;lt;/span&amp;gt;</code></pre>
+        <p>Which the browser renders as: <code>&lt;span&gt;Hello World&lt;/span&gt;</code></p>
+        <p>The following Saker markup:</p>
+        <pre><code class="language-html">@this.Raw(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)</code></pre>
+        <p>Renders this HTML:</p>
+        <pre><code class="language-html">&lt;span&gt;Hello World&lt;/span&gt;</code></pre>
+        <h4>code blocks</h4>
+        <p>Saker code blocks start with @ and are enclosed by {}. Unlike expressions, JavaScript code inside code blocks is not rendered. </p>
+        <pre><code class="language-html">@{
+    var output = "Hello World";
+}
+
+&lt;p&gt;The rendered result: @output&lt;/p&gt;</code></pre>
+        <p>Would render:</p>
+        <pre><code class="language-html">&lt;p&gt;The rendered result: Hello World&lt;/p&gt;</code></pre>
+        <h5>Implicit transitions</h5>
+        <p>The default language in a code block is JavaScript, but you can transition back to HTML. HTML within a code block will transition back into rendering HTML:</p>
+        <pre><code class="language-html">@{
+    var inJs = true;
+    &lt;p&gt;Now in HTML, was in JavaScript @inJs&lt;/p&gt;
+}</code></pre>
+        <h5>Explicit transition</h5>
+        <p>To define a sub-section of a code block that should render HTML, surround the characters to be rendered with the Saker &lt;text&gt; tag:</p>
+        <pre><code class="language-html">@for (var i = 0; i < people.Length; i++)
+{
+    var person = people[i];
+    &lt;text&gt;Name: @person.Name&lt;/text&gt;
+}</code></pre>
+        <p>You generally use this approach when you want to render HTML that is not surrounded by an HTML tag. Without an HTML or Saker tag, you get a syntax error.</p>
+        <p>Note: the &lttext&gt; won't be included in the output to the browser.</p>
+        <h4>Control Structures</h4>
+        <p>Control structures are an extension of code blocks. All aspects of code blocks (transitioning to markup, inline JavaScript) also apply to the following structures.</p>
+        <h5>Conditionals</h5>
+        <p>Include <code>@if</code>, <code>else if</code>, <code>else</code>, <code>@switch</code>.</p>
+        <p>The <code>@if</code> family controls when code runs:</p>
+        <pre><code class="language-html">@if (value % 2 == 0)
+{
+    &lt;p&gt;The value was even&lt;/p&gt;
+}</code></pre>
+        <p><code>else</code> and <code>else if</code> don't require the @ symbol:</p>
+        <pre><code class="language-html">@if (value % 2 == 0)
+{
+    &lt;p&gt;The value was even&lt;/p&gt;
+}
+else if (value >= 1337)
+{
+    &lt;p&gt;The value is large.&lt;/p&gt;
+}
+else
+{
+    &lt;p&gt;The value was not large and is odd.&lt;/p&gt;
+}</code></pre>
+        <p>You can use a switch statement like this:</p>
+        <pre><code class="language-html">@switch (value)
+{
+    case 1:
+        &lt;p&gt;The value is 1!&lt;/p&gt;
+        break;
+    case 1337:
+        &lt;p&gt;Your number is 1337!&lt;/p&gt;
+        break;
+    default:
+        &lt;p&gt;Your number was not 1 or 1337.&lt;/p&gt;
+        break;
+}</code></pre>
+        <h5>Looping</h5>
+        <p>Include <code>@for</code>, <code>@while</code>, <code>@do while</code></p>
+        <p>You can render templated HTML with looping control statements. For example, to render a list of people:</p>
+        <pre><code class="language-javascript">@{
+    var people = [{
+        name : "Jack",
+        age : "18"
+    }, {
+        name : "Lucy",
+        age : "20"
+    }]
+}</code></pre>
+        <p>You can use any of the following looping statements:</p>
+        <p><code>@for</code></p>
+        <pre><code class="language-html">@for (var i = 0; i < people.length; i++)
+{
+    var person = people[i];
+    &lt;p&gt;Name: @person.name&lt;/p&gt;
+    &lt;p&gt;Age: @person.age&lt;/p&gt;
+}</code></pre>
+        <p><code>@while</code></p>
+        <pre><code class="language-html">@{ var i = 0; }
+@while (i < people.length)
+{
+    var person = people[i];
+    &lt;p&gt;Name: @person.name&lt;/p&gt;
+    &lt;p&gt;Age: @person.age&lt;/p&gt;
+
+    i++;
+}</code></pre>
+        <p><code>@do while</code></p>
+        <pre><code class="language-html">@{ var i = 0; }
+@do
+{
+    var person = people[i];
+    &lt;p&gt;Name: @person.name&lt;/p&gt;
+    &lt;p&gt;Age: @person.age&lt;/p&gt;
+
+    i++;
+} while (i < people.length);</code></pre>
+        <h5>Exception</h5>
+        <p>Include <code>@try catch finally</code></p>
+        <pre><code class="language-html">@try{
+    throw 'some error';
+}catch(e){
+    &lt;p&gt;Has Error!&lt;/p&gt;
+}finally{
+    &lt;p&gt;Finally!&lt;/p&gt;
+}</code></pre>
+        <h5>Comments</h5>
+        <p>Include <code>@//</code>, <code>@* *@</code></p>
+        <p>Saker supports JavaScript and HTML comments. The following markup:</p>
+        <pre><code class="language-html">@{
+    /* JavaScript comment. */
+    // Another JavaScript inline comment.
+}
+&lt;!-- HTML comment --&gt;
+&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
+        <p>Is rendered by the server as:</p>
+        <pre><code class="language-html">&lt;!-- HTML comment --&gt;
+&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
+        <p>If you want to add comments in HTML and don't want to output the comments to browser, you can use Saker comments:</p>
+        <pre><code class="language-html">@// Saker inline comment
+@*
+  Saker multi-line comment
+*@
+&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
+        <p>Would render:</p>
+        <pre><code class="language-html">&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
+    </div>
+</div>
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+<script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="./node_modules/prismjs/prism.js"></script>
+</body>
+</html>

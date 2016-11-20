@@ -1,223 +1,93 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <title>Saker by eshengsky</title>
-  </head>
-
-  <body>
-    <header>
-      <div class="inner">
-        <h1>Saker</h1>
-        <h2>Saker is a template engine for Node.js and browsers, it is lightweight, powerfull and easy to use.</h2>
-        <a href="https://github.com/eshengsky/saker" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
-
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
-<a id="saker" class="anchor" href="#saker" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Saker</h1>
-
-<p>Saker is a template engine for <a href="https://nodejs.org">Node.js</a> and browsers, it is lightweight, powerfull and easy to use.</p>
-
-<p><a href="https://travis-ci.org/eshengsky/saker"><img src="https://travis-ci.org/eshengsky/saker.svg?branch=master" alt="Build Status"></a>
-<a href="https://www.npmjs.com/package/saker"><img src="https://img.shields.io/npm/v/saker.svg?style=flat" alt="NPM version"></a></p>
-
-<h2>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
-
-<div class="highlight highlight-source-shell"><pre>$ npm install saker</pre></div>
-
-<h2>
-<a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h2>
-
-<p>This is a very simple and representative sample, it shows a name list when code is 1, and if the gender is female, the &lt;li&gt; tag has a class 'pink'.</p>
-
-<h4>
-<a id="data" class="anchor" href="#data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>data</h4>
-
-<div class="highlight highlight-source-json"><pre>{
-    <span class="pl-s"><span class="pl-pds">"</span>code<span class="pl-pds">"</span></span> : <span class="pl-c1">1</span>,
-    <span class="pl-s"><span class="pl-pds">"</span>data<span class="pl-pds">"</span></span>: [{
-        <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span> : <span class="pl-c1">1</span>,
-        <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>Sky<span class="pl-pds">"</span></span>,
-        <span class="pl-s"><span class="pl-pds">"</span>gender<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>male<span class="pl-pds">"</span></span>
-    }, {
-        <span class="pl-s"><span class="pl-pds">"</span>id<span class="pl-pds">"</span></span> : <span class="pl-c1">2</span>,
-        <span class="pl-s"><span class="pl-pds">"</span>name<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>Kathy<span class="pl-pds">"</span></span>,
-        <span class="pl-s"><span class="pl-pds">"</span>gender<span class="pl-pds">"</span></span> : <span class="pl-s"><span class="pl-pds">"</span>female<span class="pl-pds">"</span></span>
-    }]
-}</pre></div>
-
-<h4>
-<a id="template" class="anchor" href="#template" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>template</h4>
-
-<div class="highlight highlight-text-html-basic"><pre>@{ this.layout = null }
-
-&lt;<span class="pl-ent">h2</span>&gt;Name List&lt;/<span class="pl-ent">h2</span>&gt;
-&lt;<span class="pl-ent">article</span>&gt;
-    @if(code === 1) {
-        &lt;<span class="pl-ent">ul</span>&gt;
-            @{
-                data.forEach(function(person) {
-                    &lt;<span class="pl-ent">li</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>@(person.gender === 'female' ? 'pink' : '')<span class="pl-pds">"</span></span>&gt;
-                        &lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>/details/@person.id<span class="pl-pds">"</span></span>&gt;@person.name&lt;/<span class="pl-ent">a</span>&gt;
-                    &lt;/<span class="pl-ent">li</span>&gt;
-                });
-            }
-        &lt;/<span class="pl-ent">ul</span>&gt;
-    } else {
-        &lt;<span class="pl-ent">p</span>&gt;Sorry, no data!&lt;/<span class="pl-ent">p</span>&gt;
-    }
-&lt;/<span class="pl-ent">article</span>&gt;</pre></div>
-
-<h4>
-<a id="result" class="anchor" href="#result" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>result</h4>
-
-<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">h2</span>&gt;Name List&lt;/<span class="pl-ent">h2</span>&gt;
-&lt;<span class="pl-ent">article</span>&gt;
-    &lt;<span class="pl-ent">ul</span>&gt;
-        &lt;<span class="pl-ent">li</span>&gt;
-            &lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>/details/1<span class="pl-pds">"</span></span>&gt;Sky&lt;/<span class="pl-ent">a</span>&gt;
-        &lt;/<span class="pl-ent">li</span>&gt;
-        &lt;<span class="pl-ent">li</span> <span class="pl-e">class</span>=<span class="pl-s"><span class="pl-pds">"</span>pink<span class="pl-pds">"</span></span>&gt;
-            &lt;<span class="pl-ent">a</span> <span class="pl-e">href</span>=<span class="pl-s"><span class="pl-pds">"</span>/details/2<span class="pl-pds">"</span></span>&gt;Kathy&lt;/<span class="pl-ent">a</span>&gt;
-        &lt;/<span class="pl-ent">li</span>&gt;
-    &lt;/<span class="pl-ent">ul</span>&gt;
-&lt;/<span class="pl-ent">article</span>&gt;</pre></div>
-
-<p>The code looks clean and graceful, isn't it?<br>
-For more examples, please see <code>examples</code> folder, it includes 3 examples each based on: </p>
-
-<ul>
-<li>the native <a href="https://nodejs.org/dist/latest-v6.x/docs/api/http.html">Node.js server</a>
-</li>
-<li>the <a href="http://expressjs.com/">Express</a> framework</li>
-<li>the browser side</li>
-</ul>
-
-<h2>
-<a id="syntax" class="anchor" href="#syntax" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Syntax</h2>
-
-<p>As you see above, Saker uses '@' as the mark symbol - the codes after it represent server-side scripts.
-The following is quick reference:</p>
-
-<table>
-<thead>
-<tr>
-<th>Syntax</th>
-<th>Example</th>
-<th>Remarks</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Implicit expression</td>
-<td><a href="https://github.com/name" class="user-mention">@name</a></td>
-<td>Simply prefix with the @ character to access a variable or a function. <em>Be aware that the output will be automatically HTML encoded.</em>
-</td>
-</tr>
-<tr>
-<td>Explicit expression</td>
-<td>@('name: ' + name)</td>
-<td>The explicit impression should be used when you want to do something that might otherwise confuse the parser. For instance, if you need to access a variable in the middle of a string or if you want to do calculations/modifications to the output.</td>
-</tr>
-<tr>
-<td>Unencoded expression</td>
-<td>@this.raw(name)</td>
-<td>The same as the implicit expression, but the output will not be HTML encoded.</td>
-</tr>
-<tr>
-<td>code blocks</td>
-<td>@{<br>    var name = 'Saker'; <br>    &lt;span&gt;<a href="https://github.com/name" class="user-mention">@name</a>&lt;/span&gt;<br>}</td>
-<td>A Saker code block starts with a combination of the @ character and the { character and ends with the } character. Inside of this, you're now writing server-side scripts. <em>Amazing, you can mix HTML markup and the server-side scripts, Saker can distinguish them intelligently!</em>
-</td>
-</tr>
-<tr>
-<td>Special code blocks</td>
-<td>
-<a href="https://github.com/if" class="user-mention">@if</a> (code == '1') {<br>    &lt;span&gt;Has data!&lt;/span&gt;<br>} else {<br>    &lt;span&gt;No data!&lt;/span&gt;<br>}</td>
-<td>It's the special style code blocks, the example left is the same as:<br>@{<br>    if (code == '1') {<br>        &lt;span&gt;Has data!&lt;/span&gt;<br>    } else {<br>        &lt;span&gt;No data!&lt;/span&gt;<br>    }<br>}<br>Special code blocks support: <a href="https://github.com/if" class="user-mention">@if</a>...else if...else, <a href="https://github.com/for" class="user-mention">@for</a>..., <a href="https://github.com/while" class="user-mention">@while</a>..., <a href="https://github.com/do" class="user-mention">@do</a>...while..., <a href="https://github.com/switch" class="user-mention">@switch</a>..., <a href="https://github.com/try" class="user-mention">@try</a>...catch...finally..., the 6 types.</td>
-</tr>
-<tr>
-<td>Plain text inside a code block</td>
-<td>&lt;text&gt;Plain text goes here...&lt;/text&gt;</td>
-<td>When you're inside a code block, you can output plain text by surrounding it with &lt;text&gt; tags, <em>the tag itself won't be included in the output to the browser</em>.</td>
-</tr>
-<tr>
-<td>Server-side comment</td>
-<td>@// This is inline comment<br><br>@* <br>    Here's a Saker server-side multi-line comment<br>    It won't be rendered to the browser<br> *@</td>
-<td>If you need to, you can easily write Saker comments in your code. They are a great alternative to HTML comments, <em>because the Saker comments won't be included in the output to the browser</em>.</td>
-</tr>
-<tr>
-<td>Output @</td>
-<td>eshengsky@@163.com</td>
-<td>Double @ will output the symbol @.</td>
-</tr>
-<tr>
-<td>Layout</td>
-<td>@this.renderBody()</td>
-<td>In layout view, you can use renderBody function to render a body view.</td>
-</tr>
-<tr>
-<td>Partial</td>
-<td>@this.renderPartial('my_partial')</td>
-<td>In a view, you can use renderPartial to render a partial view.</td>
-</tr>
-</tbody>
-</table>
-
-<h2>
-<a id="test" class="anchor" href="#test" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Test</h2>
-
-<p>You can execute the following script in terminal to run test.</p>
-
-<div class="highlight highlight-source-shell"><pre>$ npm <span class="pl-c1">test</span></pre></div>
-
-<h2>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
-
-<p>The MIT License (MIT)</p>
-
-<p>Copyright (c) 2016 Sky</p>
-
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
-
-<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
-
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
-        </section>
-
-        <aside id="sidebar">
-          <a href="https://github.com/eshengsky/saker/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/eshengsky/saker/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/eshengsky/saker"></a> is maintained by <a href="https://github.com/eshengsky">eshengsky</a>.</p>
-
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Saker by Sky</title>
+    <link rel="stylesheet" href="./css/bootstrap-paper.css">
+    <link rel="stylesheet" href="./css/main.css">
+</head>
+<body>
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" data-toggle="collapse" data-target=".navbar-collapse" class="navbar-toggle">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">
+                <span>Saker</span>
+            </a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav my-nav-pills">
+                <li class="nav-item active">
+                    <a class="nav-link" href="./">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./live-demo.html">Live Demo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./getting-started.html">Getting Started</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./syntax.html">Syntax Reference</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="./api.html">API Reference</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/eshengsky/saker">Github</a>
+                </li>
+            </ul>
+        </div>
     </div>
-
-  
-  </body>
+</div>
+<div class="container">
+    <div class="index-container">
+        <div class="jumbotron">
+            <h2>Saker</h2>
+            <iframe src="https://ghbtns.com/github-btn.html?user=eshengsky&repo=saker&type=star&count=true" frameborder="0" scrolling="0" width="100px" height="20px"></iframe>
+            <p>A template engine for <a href="https://nodejs.org/">Node.js</a> and browsers, it is lightweight,
+                powerfull and easy to use.<br>Saker is maintained by <a href="https://github.com/eshengsky">Sky</a> on <a href="https://github.com/eshengsky/saker">Github</a>.</p>
+            <p>
+                <a class="btn btn-primary" href="./getting-started.html">Getting Started</a>
+            </p>
+        </div>
+        <h4>
+            Why Saker?
+        </h4>
+        <div class="row">
+            <div class="col-md-4 col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Compact, Expressive, and Fluid</div>
+                    <div class="panel-body">
+                        Saker minimizes the number of characters and keystrokes required in a file, and enables a fast, fluid coding workflow. Unlike most template syntaxes, you do not need to interrupt your coding to explicitly denote server blocks within your HTML. The parser is smart enough to infer this from your code. This enables a really compact and expressive syntax which is clean, fast and fun to type.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">With Logic Template</div>
+                    <div class="panel-body">
+                        Unlike some other template engines (such as Handlebars) which claim to be 'NO LOGIC', Saker enables you to write business logic in template file with JavaScript syntax, such as simple expression, code block, condition flow, looping, try catch, comments... I'm sure this will make it easier and more convenient for you to build what you want.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Easy to Learn and Use</div>
+                    <div class="panel-body">
+                        Saker is not a new language, it enables you to use your existing JavaScript and HTML markup languages skills, and deliver a template markup syntax that enables an awesome HTML construction workflow. So Saker is easy to learn and enables you to quickly be productive with a minimum of concepts. You use all your existing language and HTML skills.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="./node_modules/jquery/dist/jquery.min.js"></script>
+<script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
 </html>
