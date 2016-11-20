@@ -4,6 +4,8 @@ Saker is a template engine for [Node.js](https://nodejs.org) and browsers, it is
 [![Build Status](https://travis-ci.org/eshengsky/saker.svg?branch=master)](https://travis-ci.org/eshengsky/saker)
 [![NPM version](https://img.shields.io/npm/v/saker.svg?style=flat)](https://www.npmjs.com/package/saker)
 
+## [Live Demo](https://eshengsky.github.io/saker/live-demo.html)
+
 ## Installation
 
 ```bash
@@ -79,7 +81,7 @@ For more examples, please see `examples` folder, it includes 3 examples each bas
 ## Syntax
 
 As you see above, Saker uses '@' as the mark symbol - the codes after it represent server-side scripts.
-The following is quick reference:
+The following is the syntax cheat sheet, for more details you can see [Syntax Reference](https://eshengsky.github.io/saker/syntax.html).
 
 |Syntax                         |Example   |Remarks|
 |-------------------------------|----------|-------|
@@ -91,8 +93,6 @@ The following is quick reference:
 |Plain text inside a code block |&lt;text&gt;Plain text goes here...&lt;/text&gt;|When you're inside a code block, you can output plain text by surrounding it with &lt;text&gt; tags, *the tag itself won't be included in the output to the browser*.|
 |Server-side comment            |@// This is inline comment<br><br>@* <br>&nbsp;&nbsp;&nbsp;&nbsp;Here's a Saker server-side multi-line comment<br>&nbsp;&nbsp;&nbsp;&nbsp;It won't be rendered to the browser<br> *@|If you need to, you can easily write Saker comments in your code. They are a great alternative to HTML comments, *because the Saker comments won't be included in the output to the browser*.|
 |Output @                       |eshengsky@@163.com|Double @ will output the symbol @.|
-|Layout                         |@this.renderBody()|In layout view, you can use renderBody function to render a body view.|
-|Partial                        |@this.renderPartial('my_partial')|In a view, you can use renderPartial to render a partial view.|
 
 ## Test
 
