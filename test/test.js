@@ -250,7 +250,40 @@ describe('【saker测试用例。saker test cases.】', function () {
 
         it('"@{}"块状代码。"@{}" block code.', function (done) {
             var expected = '<div>hello</div><div>saker</div>saker!';
-            saker.compile('<div>hello</div>@{var name = "saker"; <div>@name</div>}saker!').call({
+            saker.compile('<div>hello</div>@{var name = "saker";<div>@name</div>}saker!').call({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"@{}"块状代码，在标签内部。"@{}" block code, within tags.', function (done) {
+            var expected = '<div>hello</div><div><div>saker</div></div>saker!';
+            saker.compile('<div>hello</div><div>@{var name = "saker";<div>@name</div>}</div>saker!').call({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('"@{}"块状代码，在标签内部，后跟HTML。"@{}" block code, within tags, followed by HTML.', function (done) {
+            var expected = '<div>hello</div><div><div>saker</div>abc</div>saker!';
+            saker.compile('<div>hello</div><div>@{var name = "saker";<div>@name</div>}abc</div>saker!').call({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('嵌套的"@{}"块状代码。Nested "@{}" block code.', function (done) {
+            var expected = '<div>abc</div>';
+            saker.compile('@{<div>@{}abc</div>}').call({
                 layout: null
             }, function (err, actual) {
                 if (err) return done(err);
