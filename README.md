@@ -1,5 +1,5 @@
 # Saker
-Saker is a template engine for [Node.js](https://nodejs.org) and browsers, it is lightweight, powerfull and easy to use.
+Saker is a template engine for [Node.js](https://nodejs.org) and browsers, it is lightweight, powerfull and easy to use.  
 Full documentation is at [https://eshengsky.github.io/saker/](https://eshengsky.github.io/saker/).
 
 [![Build Status](https://travis-ci.org/eshengsky/saker.svg?branch=master)](https://travis-ci.org/eshengsky/saker)
