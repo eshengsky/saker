@@ -209,7 +209,7 @@ if (isNode) {
                         position: this.position
                     });
                 }
-                
+
                 //遇到 > 并且之前已经遇到过开始标签了
                 if (char === '>' && this.tags.length > 0){
                     //...</div> 或者 <img > 的结束
@@ -317,8 +317,7 @@ if (isNode) {
             for (; this.position < len; this.position++) {
                 char = this.readNextChars(1);
                 if (char === '@') {
-                    console.warn('在代码内部，请直接写脚本，不需要加上前缀“@”。');
-                    continue;
+                    throw "在代码块内部，请直接写脚本，不需要加上前缀 '@'。";
                 }
                 //引号的处理
                 if ((char === '"' || char === "'") && this.readPrevChars(1) !== '\\') {
@@ -348,22 +347,21 @@ if (isNode) {
                 } else if (char === ')' && this.quotes.length === 0) {
                     this.brackets.pop();
                 }
-                if (char === 'z') {
-                    var a = 1;
-                }
+
                 if (char === '{' && this.quotes.length === 0) {
-                    //'@{}'内部又有'@{}'，这里做下容错处理
-                    if (this.braces[this.braces.length - 1] && this.braces[this.braces.length - 1].type > 0 && this.readPrevChars(1) === '@') {
-                        this.braces.push({
-                            type: bracesEnum.noAt,
-                            position: this.position
-                        });
-                    } else {
-                        this.braces.push({
-                            type: this.readPrevChars(1) === '@' ? bracesEnum.atOther : bracesEnum.noAt,
-                            position: this.position
-                        });
-                    }
+                    //'@{}'内部又有'@{}'，且内部的 '@{}' 不处在标签内，则认为是语法错误
+                    // if (this.braces[this.braces.length - 1] && (this.braces[this.braces.length - 1].position > (this.tags[this.tags.length - 1] || {position: -1}) .position) && this.readPrevChars(1) === '@') {
+                    //     throw '代码块内部的代码无需再加上 @ 标记。';
+                    // } else {
+                    //     this.braces.push({
+                    //         type: this.readPrevChars(1) === '@' ? bracesEnum.atOther : bracesEnum.noAt,
+                    //         position: this.position
+                    //     });
+                    // }
+                    this.braces.push({
+                        type: this.readPrevChars(1) === '@' ? bracesEnum.atOther : bracesEnum.noAt,
+                        position: this.position
+                    });
                 } else if (char === '}' && this.quotes.length === 0) {
                     braceState = this.braces.pop();
                     //如果该 '}' 对应的是 '@{'
