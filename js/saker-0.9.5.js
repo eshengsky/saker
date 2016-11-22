@@ -765,7 +765,7 @@ if (isNode) {
                     }
                     //@ abc, @", @?等其他特殊字符
                     else {
-                        throw new SakerError('@ 之后不允许有该字符！', processor.getStackString('@ 之后不允许有该字符！', processor.getLineNum(this.position + 1)));
+                        throw new SakerError('@ 之后不允许有该字符！', processor.getStackString('@ 之后不允许有该字符！', processor.getLineNum(processor.position + 1)));
                     }
                 } else {
                     code = processor.readBlockServerCode();
