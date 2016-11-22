@@ -1,6 +1,9 @@
-@{this.layout = 'layout';}
+@{ this.layout = 'layout' }
 
-<h5>@greeting!</h5>
 <article>
-    @this.renderPartial('index_partial')
+    @if(code === 1) {
+        this.renderPartial('index_partial');
+    } else {
+        <p>Sorry, no data!</p>
+    }
 </article>

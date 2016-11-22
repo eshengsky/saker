@@ -3,12 +3,13 @@ var http = require('http'),
     saker = require('../../');
 
 saker.config({
-    debug: true
+    debug: true,
+    partialViewDir: './'
 });
 
 var server = http.createServer(function (req, res) {
     var path = url.parse(req.url).pathname;
-    if(path === '/'){
+    if (path === '/') {
         saker.renderView('./index.html', {
             code : 1,
             data: [{
@@ -30,7 +31,7 @@ var server = http.createServer(function (req, res) {
                 res.end(html);
             }
         });
-    }else{
+    } else {
         res.writeHead(404);
         res.end('404 Not Found!');
     }
