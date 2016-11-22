@@ -655,7 +655,7 @@ if (isNode) {
                     //@(...)
                     else if (nextChar === '(') {
                         code = processor.readBracketCode();
-                        if(/\(\s*\)/.test(code)){
+                        if (/\(\s*\)/.test(code)) {
                             code = '';
                         }
                         contentProcessor.addSegment({
@@ -765,7 +765,7 @@ if (isNode) {
                     }
                     //@ abc, @", @?等其他特殊字符
                     else {
-                        throw new SakerError('@ 之后不允许有该字符！', processor.getStackString('@ 之后不允许有该字符！', processor.getLineNum(processor.position + 1)));
+                        throw new SakerError('@ 之后不允许有该字符！', processor.getStackString('@ 之后不允许有该字符！', processor.getLineNum(processor.position)));
                     }
                 } else {
                     code = processor.readBlockServerCode();
@@ -777,13 +777,13 @@ if (isNode) {
             }
         }
         //匹配情况检查
-        if(processor.tags.length > 0){
+        if (processor.tags.length > 0) {
             throw new SakerError('存在未关闭的标签！', processor.getStackString('存在未关闭的标签！', processor.getLineNum(processor.tags[processor.tags.length - 1].position)));
         }
-        if(processor.braces.length > 0){
+        if (processor.braces.length > 0) {
             throw new SakerError('存在不匹配的大括号！', processor.getStackString('存在不匹配的大括号！', processor.getLineNum(processor.braces[processor.braces.length - 1].position)));
         }
-        if(processor.brackets.length > 0){
+        if (processor.brackets.length > 0) {
             throw new SakerError('存在不匹配的小括号！', processor.getStackString('存在不匹配的小括号！', processor.getLineNum(processor.brackets[processor.brackets.length - 1])));
         }
         return contentProcessor;
@@ -853,7 +853,6 @@ if (isNode) {
                     thisObj = {
                         model: model,
                         raw: innerHelper.raw,
-                        _renderBodyFlag: false,
                         _renderBodyFn: function () {
                             return model.$saker_body$;
                         },
@@ -873,11 +872,11 @@ if (isNode) {
                 fn += variables;
                 fn += 'var $saker_escapeHtml$ = ' + innerHelper.escapeHtml.toString() + ';\n';
                 //定义write、writeLiteral
-                fn += 'var $saker_data$ = [],\n $saker_writeLiteral$ = function(code) { $saker_data$.push(code); },\n $saker_write$ = function(code){ $saker_writeLiteral$(($saker_escapeHtml$(code))); };\n';
+                fn += 'var _this = this,$saker_data$ = [],\n $saker_writeLiteral$ = function(code) { $saker_data$.push(code); },\n $saker_write$ = function(code){ $saker_writeLiteral$(($saker_escapeHtml$(code))); };\n';
                 //定义renderPartial，引用外部的_renderPartialFn方法
                 fn += 'this.renderPartial = saker.renderPartial = function(filePath){$saker_data$.push(this._renderPartialFn(filePath, model));};\n';
                 //renderBody，引用外部的_renderBodyFn方法
-                fn += 'this.renderBody = saker.renderBody = function(){$saker_data$.push(this._renderBodyFn());};\n';
+                fn += 'this.renderBody = saker.renderBody = function(){model.$renderBodyFlag$ = true;$saker_data$.push(this._renderBodyFn());};\n';
                 //附加解析后的脚本
                 fn += content + '\n';
                 fn += 'return $saker_data$.join("");';
@@ -925,15 +924,18 @@ if (isNode) {
                                 if (err) {
                                     cb(err);
                                 } else {
-                                    if (!thisObj._renderBodyFlag) {
-                                        return cb(new SakerError('layout模板中找不到renderBody方法！', 'Saker Layout Error: ' +  'layout模板中找不到renderBody方法！'));
-                                    }
                                     thisObj.layout = null;
                                     model.$saker_body$ = html;
-                                    that.compile(layoutTemp).call({
-                                        layout: thisObj.layout
-                                    }, model, function (err, layoutHtml) {
-                                        if (err) {
+                                    try {
+                                        var fn = that.compile(layoutTemp);
+                                    } catch (err) {
+                                        return cb(err);
+                                    }
+                                    fn.call(thisObj, model, function (err, layoutHtml) {
+                                        //判断layout中是否调用了renderBody方法
+                                        if (!model.$renderBodyFlag$) {
+                                            cb(new SakerError('layout模板中没有renderBody方法！', 'Saker Layout Error: layout模板中没有renderBody方法！'))
+                                        } else if (err) {
                                             cb(err);
                                         } else {
                                             cb(null, layoutHtml);
@@ -987,12 +989,13 @@ if (isNode) {
                             thisObj.layout = path.join(model.settings.views, thisObj.layout);
                         }
                         var layoutTemp = that.getView(thisObj.layout);
-                        if (!thisObj._renderBodyFlag) {
-                            throw new SakerError('layout模板中找不到renderBody方法！', 'Saker Layout Error: ' +  'layout模板中找不到renderBody方法！');
-                        }
                         thisObj.layout = null;
                         model.$saker_body$ = html;
-                        return that.compile(layoutTemp)(model);
+                        var layoutHtml = that.compile(layoutTemp).call(thisObj, model);
+                        if (!model.$renderBodyFlag$) {
+                            throw new SakerError('layout模板中没有renderBody方法！', 'Saker Layout Error: layout模板中没有renderBody方法！');
+                        }
+                        return layoutHtml;
                     } else {
                         //layout为空或null
                         return html;
@@ -1021,7 +1024,11 @@ if (isNode) {
                     if (err) {
                         return cb(err);
                     }
-                    var compiled = saker.compile(template);
+                    try {
+                        var compiled = saker.compile(template);
+                    } catch (err) {
+                        return cb(err);
+                    }
                     if (isProd) {
                         cache[filePath] = compiled;
                     }
