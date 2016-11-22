@@ -47,20 +47,23 @@
         try {
             data = eval('(' + data + ')');
         } catch (err) {
-            editor3.setValue('Error in Data panel: ' + err.message);
+            editor3.setValue('Error in Data panel: ' + err.stack);
             editor3.clearSelection();
             editor3.renderer.setStyle("err", true);
             return;
         }
 
         try {
+            saker.config({
+                debug: true
+            });
             html = saker.compile(template)(data);
             editor3.setValue(html);
             editor3.session.setMode("ace/mode/html");
             editor3.clearSelection();
             editor3.renderer.unsetStyle("err", true)
         } catch (err) {
-            editor3.setValue('Error in Template panel: ' + err.message);
+            editor3.setValue('Error in Template panel: ' + err.stack);
             editor3.clearSelection();
             editor3.renderer.setStyle("err", true)
         }
