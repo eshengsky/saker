@@ -6,6 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Saker by Sky</title>
     <link rel="stylesheet" href="./css/bootstrap-paper.css">
+    <link rel="stylesheet" href="./css/font-awesome.min.css">
     <link rel="stylesheet" href="./css/prism.css">
     <link rel="stylesheet" href="./css/main.css">
 </head>
@@ -41,7 +42,7 @@
                     <a class="nav-link" href="./api.html">API Reference</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="https://github.com/eshengsky/saker">Github</a>
+                    <a class="nav-link" href="https://github.com/eshengsky/saker"><i class="fa fa-github"></i> Github</a>
                 </li>
             </ul>
         </div>
@@ -58,12 +59,43 @@
             <pre><code class="language-html">&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
             <p>Is rendered unchanged as <code>&lt;p&gt;Hello World&lt;/p&gt;</code> by the server.</p>
             <h4>Saker syntax</h4>
-            <p>Saker uses the @ symbol to transition from HTML to JavaScript. Saker evaluates JavaScript expressions and
+            <p>Saker uses the <code>@</code> symbol to transition from HTML to JavaScript. Saker evaluates JavaScript
+                expressions and
                 renders them in the HTML output.</p>
+            <p>Data (will pass to template):</p>
+            <pre><code class="language-javascript">{
+    name: 'Saker',
+    author: 'Sky'
+}</code></pre>
+            <p>Template:</p>
+            <pre><code class="language-html">&lt;p&gt;@name&lt;/p&gt;</code></pre>
+            <p>Would render:</p>
+            <pre><code class="language-html">&lt;p&gt;Saker&lt;/p&gt;</code></pre>
+            <p><strong>Note:</strong> you can also visit data model with <code>model</code> namespace, such as, to visit
+                <code>name</code>, use <code>@name</code>, <code>@model.name</code> or <code>@this.model.name</code> are
+                all correct.</p>
             <p>HTML containing @ symbols may need to be escaped with a second @ symbol. For example:</p>
             <pre><code class="language-html">&lt;p&gt;eshengsky@@163.com&lt;/p&gt;</code></pre>
             <p>would render the following HTML:</p>
             <pre><code class="language-html">&lt;p&gt;eshengsky@163.com&lt;/p&gt;</code></pre>
+            <h4>Internal object</h4>
+            <span>Saker internal object include:</span>
+            <ul>
+                <li>model - the data model passed to template</li>
+                <li>raw - disable HTML endcode, see <a href="javascript:void(0)"
+                                                       onclick="scrollView('Expression encoding')">here</a></li>
+                <li>layout - the layout file name which you want to render in a body view, see <a
+                        href="javascript:void(0)"
+                        onclick="scrollView('Layout')">here</a></li>
+                <li>renderBody - render a body view in layout view, see <a href="javascript:void(0)"
+                                                                           onclick="scrollView('Layout')">here</a></li>
+                <li>renderPartial - render a partial view, see <a href="javascript:void(0)"
+                                                                  onclick="scrollView('Partial')">here</a></li>
+            </ul>
+            <p>You can visit them with <code>this</code> or <code>saker</code> in template file. <code>saker</code> is an alias for <code>this</code>. such as function <code>raw</code>:</p>
+            <pre><code class="language-html">@this.raw(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)
+
+@saker.raw(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)</code></pre>
             <h4>Implicit expressions</h4>
             <p>Implicit Saker expressions start with @ followed by JavaScript code. For example:</p>
             <pre><code class="language-html">&lt;p&gt;@JSON.parse("true")&lt;/p&gt;</code></pre>
@@ -76,21 +108,20 @@
             <pre><code class="language-html">&lt;p&gt;@1 + 1&lt;/p&gt;</code></pre>
             <p>Which renders the following HTML:</p>
             <pre><code class="language-html">&lt;p&gt;1 + 1&lt;/p&gt;</code></pre>
-            <h4>Expression encoding</h4>
+            <h4 id="Expression_encoding">Expression encoding</h4>
             <p>JavaScript expressions that evaluate to a string are HTML encoded. For example, the following Saker
                 markup:</p>
             <pre><code class="language-html">@(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)</code></pre>
             <p>Renders this HTML:</p>
             <pre><code class="language-html">&amp;lt;span&amp;gt;Hello World&amp;lt;/span&amp;gt;</code></pre>
-            <p>Which the browser renders as: <code>&lt;span&gt;Hello World&lt;/span&gt;</code></p>
-            <p>The following Saker markup:</p>
-            <pre><code class="language-html">@this.Raw(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)</code></pre>
-            <p>Renders this HTML:</p>
+            <p>To disable HTML encode, please call <code>raw</code> function:</p>
+            <pre><code class="language-html">@this.raw(&quot;&lt;span&gt;Hello World&lt;/span&gt;&quot;)</code></pre>
+            <p>Would render:</p>
             <pre><code class="language-html">&lt;span&gt;Hello World&lt;/span&gt;</code></pre>
-            <h4>code blocks</h4>
+            <h4>Code blocks</h4>
             <p>Saker code blocks start with @ and are enclosed by {}. Unlike expressions, JavaScript code inside code
                 blocks is not rendered. </p>
-        <pre><code class="language-html">@{
+            <pre><code class="language-html">@{
     var output = "Hello World";
 }
 
@@ -100,14 +131,14 @@
             <h5>Implicit transitions</h5>
             <p>The default language in a code block is JavaScript, but you can transition back to HTML. HTML within a
                 code block will transition back into rendering HTML:</p>
-        <pre><code class="language-html">@{
+            <pre><code class="language-html">@{
     var inJs = true;
     &lt;p&gt;Now in HTML, was in JavaScript @inJs&lt;/p&gt;
 }</code></pre>
             <h5>Explicit transition</h5>
             <p>To define a sub-section of a code block that should render HTML, surround the characters to be rendered
                 with the Saker &lt;text&gt; tag:</p>
-        <pre><code class="language-html">@for (var i = 0; i < people.Length; i++)
+            <pre><code class="language-html">@for (var i = 0; i < people.Length; i++)
 {
     var person = people[i];
     &lt;text&gt;Name: @person.Name&lt;/text&gt;
@@ -121,12 +152,12 @@
             <h5>Conditionals</h5>
             <p>Include <code>@if</code>, <code>else if</code>, <code>else</code>, <code>@switch</code>.</p>
             <p>The <code>@if</code> family controls when code runs:</p>
-        <pre><code class="language-html">@if (value % 2 == 0)
+            <pre><code class="language-html">@if (value % 2 == 0)
 {
     &lt;p&gt;The value was even&lt;/p&gt;
 }</code></pre>
             <p><code>else</code> and <code>else if</code> don't require the @ symbol:</p>
-        <pre><code class="language-html">@if (value % 2 == 0)
+            <pre><code class="language-html">@if (value % 2 == 0)
 {
     &lt;p&gt;The value was even&lt;/p&gt;
 }
@@ -139,7 +170,7 @@ else
     &lt;p&gt;The value was not large and is odd.&lt;/p&gt;
 }</code></pre>
             <p>You can use a switch statement like this:</p>
-        <pre><code class="language-html">@switch (value)
+            <pre><code class="language-html">@switch (value)
 {
     case 1:
         &lt;p&gt;The value is 1!&lt;/p&gt;
@@ -155,7 +186,7 @@ else
             <p>Include <code>@for</code>, <code>@while</code>, <code>@do while</code></p>
             <p>You can render templated HTML with looping control statements. For example, to render a list of
                 people:</p>
-        <pre><code class="language-javascript">@{
+            <pre><code class="language-javascript">@{
     var people = [{
         name : "Jack",
         age : "18"
@@ -166,14 +197,14 @@ else
 }</code></pre>
             <p>You can use any of the following looping statements:</p>
             <p><code>@for</code></p>
-        <pre><code class="language-html">@for (var i = 0; i < people.length; i++)
+            <pre><code class="language-html">@for (var i = 0; i < people.length; i++)
 {
     var person = people[i];
     &lt;p&gt;Name: @person.name&lt;/p&gt;
     &lt;p&gt;Age: @person.age&lt;/p&gt;
 }</code></pre>
             <p><code>@while</code></p>
-        <pre><code class="language-html">@{ var i = 0; }
+            <pre><code class="language-html">@{ var i = 0; }
 @while (i < people.length)
 {
     var person = people[i];
@@ -183,7 +214,7 @@ else
     i++;
 }</code></pre>
             <p><code>@do while</code></p>
-        <pre><code class="language-html">@{ var i = 0; }
+            <pre><code class="language-html">@{ var i = 0; }
 @do
 {
     var person = people[i];
@@ -194,7 +225,7 @@ else
 } while (i < people.length);</code></pre>
             <h5>Exception</h5>
             <p>Include <code>@try catch finally</code></p>
-        <pre><code class="language-html">@try{
+            <pre><code class="language-html">@try{
     throw 'some error';
 }catch(e){
     &lt;p&gt;Has Error!&lt;/p&gt;
@@ -204,24 +235,61 @@ else
             <h5>Comments</h5>
             <p>Include <code>@//</code>, <code>@* *@</code></p>
             <p>Saker supports JavaScript and HTML comments. The following markup:</p>
-        <pre><code class="language-html">@{
+            <pre><code class="language-html">@{
     /* JavaScript comment. */
     // Another JavaScript inline comment.
 }
 &lt;!-- HTML comment --&gt;
 &lt;p&gt;Hello World&lt;/p&gt;</code></pre>
             <p>Is rendered by the server as:</p>
-        <pre><code class="language-html">&lt;!-- HTML comment --&gt;
+            <pre><code class="language-html">&lt;!-- HTML comment --&gt;
 &lt;p&gt;Hello World&lt;/p&gt;</code></pre>
             <p>If you want to add comments in HTML and don't want to output the comments to browser, you can use Saker
                 comments:</p>
-        <pre><code class="language-html">@// Saker inline comment
+            <pre><code class="language-html">@// Saker inline comment
 @*
   Saker multi-line comment
 *@
 &lt;p&gt;Hello World&lt;/p&gt;</code></pre>
             <p>Would render:</p>
             <pre><code class="language-html">&lt;p&gt;Hello World&lt;/p&gt;</code></pre>
+            <h4>Layout</h4>
+            <p>To render layout view, you should set <code>this.layout = 'layoutName'</code> in body
+                view, and must call <code>renderBody</code> function in layout view. </p>
+            <p>index.html (body view):</p>
+            <pre><code class="language-html">@{ this.layout = 'layout'; }
+
+&lt;p&gt;This is body view.&lt;/p&gt;</code></pre>
+            <p>layout.html (layout view):</p>
+            <pre><code class="language-html">&lt;html&gt;
+    &lt;body&gt;
+        &lt;h2&gt;Hello&lt;/h2&gt;
+        @this.renderBody()
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            <p>Would render:</p>
+            <pre><code class="language-html">&lt;html&gt;
+    &lt;body&gt;
+        &lt;h2&gt;Hello&lt;/h2&gt;
+        &lt;p&gt;This is body view.&lt;/p&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            <p><code>this.layout</code> can be assigned to the layout file name or path, Saker will try to read the file content as layout template. If you set <code>this.layout = null</code>
+            or <code>this.layout = ''</code> or <code>this.layout = false</code>, Saker won't render any layout. If you do NOT set layout explicitly, it will render the default layout file
+            according to <code>config.defaultLayout</code>.</p>
+            <p><code>this.renderBody()</code> indicates where to render body view in current layout template.</p>
+            <h4>Partial</h4>
+            <p>To render a partial view, call <code>this.renderPartial</code> function with the partial file name as parameter.</p>
+            <p>index.html (body view):</p>
+            <pre><code class="language-html">&lt;div&gt;
+    @this.renderPartial('index_partial')
+&lt;/div&gt;</code></pre>
+            <p>index_partial.html (partial view):</p>
+            <pre><code class="language-html">&lt;h5&gt;This is partial view.&lt;/h5&gt;</code></pre>
+            <p>Would render:</p>
+            <pre><code class="language-html">&lt;div&gt;
+    &lt;h5&gt;This is partial view.&lt;/h5&gt;
+&lt;/div&gt;</code></pre>
         </article>
     </div>
 </div>
@@ -230,17 +298,23 @@ else
 <script src="./js/prism.js"></script>
 <script src="./js/jquery.scrollNav.min.js"></script>
 <script>
-    $("article").scrollNav({
-        sections: "h4",  //一级目录的元素
-        subSections: "h5",  //二级目录的元素
-        showHeadline: true,
-        headlineText: "Contents",
-        showTopLink: false,
-        scrollOffset: 80,
-        arrowKeys: true,
-        insertTarget: ".menu",
-        insertLocation: "prependTo"
-    });
+    setTimeout(function () {
+        $("article").scrollNav({
+            sections: "h4",  //一级目录的元素
+            subSections: "h5",  //二级目录的元素
+            showHeadline: true,
+            headlineText: "Contents",
+            showTopLink: false,
+            scrollOffset: 70,
+            arrowKeys: true,
+            insertTarget: ".menu",
+            insertLocation: "prependTo"
+        });
+    }, 0);
+
+    var scrollView = function (title) {
+        $('.menu a:contains("' + title + '")').click();
+    }
 </script>
 </body>
 </html>

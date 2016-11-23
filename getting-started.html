@@ -6,6 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Saker by Sky</title>
     <link rel="stylesheet" href="./css/bootstrap-paper.css">
+    <link rel="stylesheet" href="./css/font-awesome.min.css">
     <link rel="stylesheet" href="./css/prism.css">
     <link rel="stylesheet" href="./css/main.css">
 </head>
@@ -41,7 +42,7 @@
                     <a class="nav-link" href="./api.html">API Reference</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="https://github.com/eshengsky/saker">Github</a>
+                    <a class="nav-link" href="https://github.com/eshengsky/saker"><i class="fa fa-github"></i> Github</a>
                 </li>
             </ul>
         </div>
@@ -49,103 +50,134 @@
 </div>
 <div class="container">
     <div class="content-container">
-        <h3>Getting Started</h3>
-        <h4>Installation </h4>
-        <p>Saker is available via <a href="https://www.npmjs.com/">npm</a>:</p>
-        <pre><code class="language-bash">$ npm install --save saker</code></pre>
-        <h4>Hello Saker!</h4>
-        <p>Now let's have out first demo: Hello Saker!</p>
-        <p>Open a terminal, and go to the directory which you've installed saker just now, type according to the
-            following steps:</p>
-        <p>Step1: switch to node mode</p>
-        <pre><code class="language-bash">$ node</code></pre>
-        <p>Step2: require the Saker module</p>
-        <pre><code class="language-bash">> var saker = require('saker')</code></pre>
-        <p>Step3: compile template string 'Hello @name!' with data model: {name: 'Saker'}</p>
-        <pre><code
-                class="language-bash">> saker.compile('Hello @name!').call({layout: null},{name: 'Saker'})</code></pre>
-        <p>If everything goes well, you can see the stdout as result:</p>
-        <pre><code>'Hello Saker!'</code></pre>
-        <h4>Syntax Cheat Sheet</h4>
-        <p>As you see above, Saker uses '@' as the mark symbol - the codes after it represent server-side scripts. The following is the syntax cheat sheet, for more details you can see <a href="./syntax.html">Syntax Reference</a>.</p>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover ">
-                <thead>
-                <tr>
-                    <th>Syntax</th>
-                    <th>Example</th>
-                    <th>Remarks</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>Implicit expression</td>
-                    <td>@name</td>
-                    <td>Simply prefix with the @ character to access a variable or a function. <em>Be aware that the output
-                        will be automatically HTML encoded.</em></td>
-                </tr>
-                <tr>
-                    <td>Explicit expression</td>
-                    <td>@('name: ' + name)</td>
-                    <td>The explicit impression should be used when you want to do something that might otherwise confuse
-                        the parser. For instance, if you need to access a variable in the middle of a string or if you want
-                        to do calculations/modifications to the output.
-                    </td>
-                </tr>
-                <tr>
-                    <td>Unencoded expression</td>
-                    <td>@this.raw(name)</td>
-                    <td>The same as the implicit expression, but the output will not be HTML encoded.</td>
-                </tr>
-                <tr>
-                    <td>code blocks</td>
-                    <td>@{<br>&nbsp;&nbsp;&nbsp;&nbsp;var name = 'Saker'; <br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;@name&lt;/span&gt;<br>}
-                    </td>
-                    <td>A Saker code block starts with a combination of the @ character and the { character and ends with
-                        the } character. Inside of this, you're now writing server-side scripts. <em>Amazing, you can mix
-                            HTML markup and the server-side scripts, Saker can distinguish them intelligently!</em></td>
-                </tr>
-                <tr>
-                    <td>Special code blocks</td>
-                    <td>@if (code == '1') {<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;Has data!&lt;/span&gt;<br>} else {<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;No
-                        data!&lt;/span&gt;<br>}
-                    </td>
-                    <td>It's the special style code blocks, the example left is the same as:<br>@{<br>&nbsp;&nbsp;&nbsp;&nbsp;if
-                        (code == '1') {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;Has data!&lt;/span&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;}
-                        else {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;No data!&lt;/span&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>Special
-                        code blocks support: @if...else if...else, @for..., @while..., @do...while..., @switch...,
-                        @try...catch...finally..., the 6 types.
-                    </td>
-                </tr>
-                <tr>
-                    <td>Plain text inside a code block</td>
-                    <td>&lt;text&gt;Plain text goes here...&lt;/text&gt;</td>
-                    <td>When you're inside a code block, you can output plain text by surrounding it with &lt;text&gt; tags,
-                        <em>the tag itself won't be included in the output to the browser</em>.
-                    </td>
-                </tr>
-                <tr>
-                    <td>Server-side comment</td>
-                    <td>@// This is inline comment<br><br>@* <br>&nbsp;&nbsp;&nbsp;&nbsp;Here's a Saker server-side
-                        multi-line comment<br>&nbsp;&nbsp;&nbsp;&nbsp;It won't be rendered to the browser<br> *@
-                    </td>
-                    <td>If you need to, you can easily write Saker comments in your code. They are a great alternative to
-                        HTML comments, <em>because the Saker comments won't be included in the output to the browser</em>.
-                    </td>
-                </tr>
-                <tr>
-                    <td>Output @</td>
-                    <td>eshengsky@@163.com</td>
-                    <td>Double @ will output the symbol @.</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-
+        <div class="col-md-3 hidden-sm hidden-xs menu"></div>
+        <article class="col-md-9 col-sm-12 col-xs-12">
+            <h3>Getting Started</h3>
+            <h4>Installation </h4>
+            <p>Saker is available via <a href="https://www.npmjs.com/">npm</a>:</p>
+            <pre><code class="language-bash">$ npm install --save saker</code></pre>
+            <h4>Hello Saker!</h4>
+            <p>Now let's have out first demo: Hello Saker!</p>
+            <p>Open a terminal, and go to the directory which you've installed saker just now, type according to the
+                following steps:</p>
+            <p>Step1: switch to node mode</p>
+            <pre><code class="language-bash">$ node</code></pre>
+            <p>Step2: require the Saker module</p>
+            <pre><code class="language-bash">> var saker = require('saker')</code></pre>
+            <p>Step3: compile template string 'Hello @name!' with data model: {name: 'Saker'}</p>
+            <pre><code
+                    class="language-bash">> saker.compile('Hello @name!').call({layout: null},{name: 'Saker'})</code></pre>
+            <p>If everything goes well, you can see the stdout as result:</p>
+            <pre><code>'Hello Saker!'</code></pre>
+            <h4>Syntax Cheat Sheet</h4>
+            <p>As you see above, Saker uses '@' as the mark symbol - the codes after it represent server-side scripts.
+                The following is the syntax cheat sheet, for more details you can see <a href="./syntax.html">Syntax
+                    Reference</a>.</p>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover ">
+                    <thead>
+                    <tr>
+                        <th>Syntax</th>
+                        <th>Example</th>
+                        <th>Remarks</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Implicit expression</td>
+                        <td>@name</td>
+                        <td>Simply prefix with the @ character to access a variable or a function. <em>Be aware that the
+                            output
+                            will be automatically HTML encoded.</em></td>
+                    </tr>
+                    <tr>
+                        <td>Explicit expression</td>
+                        <td>@('name: ' + name)</td>
+                        <td>The explicit impression should be used when you want to do something that might otherwise
+                            confuse
+                            the parser. For instance, if you need to access a variable in the middle of a string or if
+                            you want
+                            to do calculations/modifications to the output.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Unencoded expression</td>
+                        <td>@this.raw(name)</td>
+                        <td>The same as the implicit expression, but the output will not be HTML encoded.</td>
+                    </tr>
+                    <tr>
+                        <td>code blocks</td>
+                        <td>@{<br>&nbsp;&nbsp;&nbsp;&nbsp;var name = 'Saker'; <br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;@name&lt;/span&gt;<br>}
+                        </td>
+                        <td>A Saker code block starts with a combination of the @ character and the { character and ends
+                            with
+                            the } character. Inside of this, you're now writing server-side scripts. <em>Amazing, you
+                                can mix
+                                HTML markup and the server-side scripts, Saker can distinguish them intelligently!</em>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Special code blocks</td>
+                        <td>@if (code == '1') {<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;Has data!&lt;/span&gt;<br>} else
+                            {<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;No
+                            data!&lt;/span&gt;<br>}
+                        </td>
+                        <td>It's the special style code blocks, the example left is the same as:<br>@{<br>&nbsp;&nbsp;&nbsp;&nbsp;if
+                            (code == '1') {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;Has data!&lt;/span&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;}
+                            else {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;span&gt;No
+                            data!&lt;/span&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>Special
+                            code blocks support: @if...else if...else, @for..., @while..., @do...while..., @switch...,
+                            @try...catch...finally..., the 6 types.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Plain text inside a code block</td>
+                        <td>&lt;text&gt;Plain text goes here...&lt;/text&gt;</td>
+                        <td>When you're inside a code block, you can output plain text by surrounding it with &lt;text&gt;
+                            tags,
+                            <em>the tag itself won't be included in the output to the browser</em>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Server-side comment</td>
+                        <td>@// This is inline comment<br><br>@* <br>&nbsp;&nbsp;&nbsp;&nbsp;Here's a Saker server-side
+                            multi-line comment<br>&nbsp;&nbsp;&nbsp;&nbsp;It won't be rendered to the browser<br> *@
+                        </td>
+                        <td>If you need to, you can easily write Saker comments in your code. They are a great
+                            alternative to
+                            HTML comments, <em>because the Saker comments won't be included in the output to the
+                                browser</em>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Output @</td>
+                        <td>eshengsky@@163.com</td>
+                        <td>Double @ will output the symbol @.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
     </div>
 </div>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/bootstrap.min.js"></script>
 <script src="./js/prism.js"></script>
+<script src="./js/jquery.scrollNav.min.js"></script>
+<script>
+    setTimeout(function () {
+        $("article").scrollNav({
+            sections: "h4",  //一级目录的元素
+            subSections: "h5",  //二级目录的元素
+            showHeadline: true,
+            headlineText: "Contents",
+            showTopLink: false,
+            scrollOffset: 70,
+            arrowKeys: true,
+            insertTarget: ".menu",
+            insertLocation: "prependTo"
+        });
+    }, 0)
+</script>
 </body>
 </html>

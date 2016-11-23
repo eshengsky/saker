@@ -2,6 +2,10 @@ body {
     font-size: 14px;
 }
 
+pre code{
+    font-size: 13px;
+}
+
 .index-container {
     margin-top: 90px;
 }
@@ -14,11 +18,11 @@ body {
     min-height: 300px;
 }
 
-.demo-pre pre#resultArea{
+.demo-pre pre#resultArea {
     border-color: #4caf50;
 }
 
-.demo-pre pre#resultArea.err{
+.demo-pre pre#resultArea.err {
     border-color: #e51c23;
 }
 
@@ -60,7 +64,7 @@ menu {
 }
 
 .scroll-nav__item, .scroll-nav__sub-item {
-    color: #777;
+    color: #999;
 }
 
 .scroll-nav__item > a, .scroll-nav__sub-item > a {
@@ -68,16 +72,16 @@ menu {
 }
 
 .scroll-nav__item.active, .scroll-nav__item.active .scroll-nav__sub-item.active {
-    color: #2196f3;
+    color: #666;
 }
 
 .scroll-nav__item.active > a, .scroll-nav__item.active .scroll-nav__sub-item.active > a {
-    color: #2196f3;
+    color: #666;
     font-weight: bold;
 }
 
 .scroll-nav__item.active > a::before {
-    border-left: 3px solid #2196f3;
+    border-left: 3px solid #666;
     content: "";
     display: block;
     height: 26px;
@@ -89,15 +93,19 @@ menu {
 }
 
 .scroll-nav__item:hover, .scroll-nav__sub-item:hover, .scroll-nav__item > a:hover, .scroll-nav__sub-item > a:hover {
-    color: #2196f3;
+    color: #666;
     text-decoration: none;
 }
 
 .scroll-nav__item:focus, .scroll-nav__sub-item:focus, .scroll-nav__item > a:focus, .scroll-nav__sub-item > a:focus {
-    color: #2196f3;
+    color: #666;
     text-decoration: none;
 }
 
-.scroll-nav__sub-list{
+.scroll-nav__sub-list {
     list-style-type: square;
+}
+
+article pre {
+    border: none;
 }

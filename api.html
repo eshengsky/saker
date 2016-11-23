@@ -6,6 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Saker by Sky</title>
     <link rel="stylesheet" href="./css/bootstrap-paper.css">
+    <link rel="stylesheet" href="./css/font-awesome.min.css">
     <link rel="stylesheet" href="./css/prism.css">
     <link rel="stylesheet" href="./css/main.css">
 </head>
@@ -41,7 +42,8 @@
                             class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="https://github.com/eshengsky/saker">Github</a>
+                    <a class="nav-link" href="https://github.com/eshengsky/saker"><i class="fa fa-github"></i>
+                        Github</a>
                 </li>
             </ul>
         </div>
@@ -49,11 +51,32 @@
 </div>
 <div class="container">
     <div class="content-container">
-        <h3>API Reference</h3>
+        <div class="col-md-3 hidden-sm hidden-xs menu"></div>
+        <article class="col-md-9 col-sm-12 col-xs-12">
+            <h3>API Reference</h3>
+            <h4>saker.compile(str)</h4>
+            <p>Compile a template string to a function which can be rendered multiple times with different locals.</p>
+        </article>
     </div>
 </div>
 <script src="./js/jquery.min.js"></script>
 <script src="./js/bootstrap.min.js"></script>
 <script src="./js/prism.js"></script>
+<script src="./js/jquery.scrollNav.min.js"></script>
+<script>
+    setTimeout(function () {
+        $("article").scrollNav({
+            sections: "h4",  //一级目录的元素
+            subSections: "h5",  //二级目录的元素
+            showHeadline: true,
+            headlineText: "Contents",
+            showTopLink: false,
+            scrollOffset: 70,
+            arrowKeys: true,
+            insertTarget: ".menu",
+            insertLocation: "prependTo"
+        });
+    }, 0)
+</script>
 </body>
 </html>
