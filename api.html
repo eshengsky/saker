@@ -54,8 +54,85 @@
         <div class="col-md-3 hidden-sm hidden-xs menu"></div>
         <article class="col-md-9 col-sm-12 col-xs-12">
             <h3>API Reference</h3>
+            <p>Saker support native <a href="https://nodejs.org/dist/latest-v6.x/docs/api/http.html">Node.js server</a>, <a href="http://expressjs.com/">Express</a> and browsers, but the api for them is not exactly the same.
+                <span class="label label-default">Node.js</span>means this support native Node.js server,
+                <span class="label label-default">Express</span>means this support Express,
+                <span class="label label-default">Browser</span>means this support browsers.</p>
+            <h4>saker.config(options)</h4>
+            <span class="label label-default">Node.js</span><span class="label label-default">Express</span><span class="label label-default">Browser</span>
+            <p>Set the configuration for Saker, this will overwrite the default value.</p>
+            <p><strong>options : </strong>object<br>&nbsp;&nbsp;&nbsp;&nbsp;The configuration set.</p>
+            <p><strong>options.debug : </strong>boolean&nbsp;&nbsp;&nbsp;<span class="label label-default">Node.js</span><span class="label label-default">Express</span><span class="label label-default">Browser</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;Output debug info if this is true, default is false.</p>
+            <p><strong>options.defaultLayout : </strong>string&nbsp;&nbsp;&nbsp;<span class="label label-default">Node.js</span><span class="label label-default">Express</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;The default layout file when you do not set it in a view, default is 'layout.html'.</p>
+            <p><strong>options.partialViewDir : </strong>string&nbsp;&nbsp;&nbsp;<span class="label label-default">Node.js</span><span class="label label-default">Express</span><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;The default partial view directory, default is './views/partials/'.</p>
+            <p><strong>returns : </strong>undefined</p>
+            <h4>saker.getView(filePath, cb)</h4>
+            <span class="label label-default">Node.js</span><span class="label label-default">Express</span>
+            <p>Try to read a file, return it's content with utf8 encoded.</p>
+            <p><strong>filePath : </strong>string<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                The file path you want to read.</p>
+            <p><strong>cb : </strong>function<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                The callback function, the first argument is possible error, the second is file content.</p>
+            <p><strong>returns : </strong>undefined</p>
             <h4>saker.compile(str)</h4>
+            <span class="label label-default">Node.js</span><span class="label label-default">Express</span><span class="label label-default">Browser</span>
             <p>Compile a template string to a function which can be rendered multiple times with different locals.</p>
+            <p><strong>str : </strong>string<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                The source Saker template string to compile.</p>
+            <p><strong>returns : </strong>function<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                A function to generate the HTML from a data model object.</p>
+            <pre><code class="language-javascript">var saker = require('saker');
+
+// Compile a function
+var fn = saker.compile('&lt;div&gt;@name&lt;/div&gt;');
+
+// Define a data model
+var model = {
+    name: 'Saker'
+}
+
+// Render the function
+var html = fn.call({layout: null}, model);</code></pre>
+            <p>Also you can pass additional function to the returned function as callback:</p>
+            <pre><code class="language-javascript">fn.call({layout: null}, model, function(err, html){
+    if(err){
+        return console.error(err);
+    }
+    console.log(html);
+})</code></pre>
+            <p>Here wo don't want to render layout view, so wo call the returned function as scope <code>{layout: null}</code>, you can also write it in template like this:</p>
+            <pre><code class="language-javascript">var fn = saker.compile('@{this.layout = null;} &lt;div&gt;@name&lt;/div&gt;');</code></pre>
+            <h4>saker.renderView(filePath, model, cb)</h4>
+            <span class="label label-default">Node.js</span><span class="label label-default">Express</span>
+            <p>Get the result HTML from template file and data model. </p>
+            <p><strong>filePath : </strong>string<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                The template file path.</p>
+            <p><strong>model : </strong>object<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                The data model, used as the locals object.</p>
+            <p><strong>cb : </strong>function<br>&nbsp;&nbsp;&nbsp;&nbsp;
+                The callback function.</p>
+            <p><strong>returns : </strong>undefined</p>
+            <pre><code class="language-javascript">saker.renderView('./index.html', {
+    code : 1,
+    name: 'Saker'
+}, function (err, html) {
+    if (err) {
+        res.writeHead(500, {'Content-Type': 'text/html'});
+        res.end(err.stack);
+    } else {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.end(html);
+    }
+})</code></pre>
+            <p>Saker is integrated with Express, so if you are using Express, you can also simply call <code>res.render</code>:</p>
+            <pre><code class="language-javascript">var model = {
+    code : 1,
+    name: 'Saker'
+};
+res.render('index', model);</code></pre>
         </article>
     </div>
 </div>
