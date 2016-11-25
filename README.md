@@ -2,7 +2,7 @@
 Full documentation is at [https://eshengsky.github.io/saker/](https://eshengsky.github.io/saker/).
 
 Saker is a template engine for [Node.js](https://nodejs.org) and browsers, it is lightweight, powerfull and easy to use.  
-The greatest featuIt is, Saker minimizes the number of characters and keystrokes required in a file, and enables a fast, fluid coding workflow. Unlike most template syntaxes, you do not need to interrupt your coding to explicitly denote server blocks within your HTML. See [Example](https://github.com/eshengsky/saker#example) for preview.
+The greatest feature is, Saker minimizes the number of characters and keystrokes required in a file, and enables a fast, fluid coding workflow. Unlike most template syntaxes, you do not need to interrupt your coding to explicitly denote server blocks within your HTML. See [Example](https://github.com/eshengsky/saker#example) for preview.
 
 
 [![Build Status](https://travis-ci.org/eshengsky/saker.svg?branch=master)](https://travis-ci.org/eshengsky/saker)
