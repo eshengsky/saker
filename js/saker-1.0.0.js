@@ -1,5 +1,6 @@
 /**
  * Saker
+ * The template engine for Node.js and browsers.
  * Copyright(c) 2016 Sky <eshengsky@163.com>
  * MIT Licensed
  */
@@ -17,7 +18,7 @@ if (isNode) {
 
 (function () {
     /**
-     * 配置项
+     * 配置项。Configure set.
      * @type {{debug: boolean, defaultLayout: string, partialViewDir: string}}
      */
     var configure = {
@@ -27,40 +28,40 @@ if (isNode) {
     };
 
     /**
-     * 模板编译结果缓存（注：缓存的是解析后返回的function）
+     * 模板编译结果缓存（注：缓存的是解析后返回的function）。The cache for complied result (note: it stored the returned function).
      * @type {{}}
      */
     var cache = {};
 
     /**
-     * 读取状态枚举
+     * 读取状态枚举。Read state enum.
      * @type {{client: number, server: number}}
      */
     var stateEnum = {
-        //前端代码
+        //前端代码。Frontend code.
         client: 0,
 
-        //后端代码
+        //后端代码。Backend code.
         server: 1
     };
 
     /**
-     * 文本类型枚举
+     * 文本类型枚举。String type enum.
      * @type {{markup: number, expression: number, script: number}}
      */
     var modeEnum = {
-        //html标记
+        //HTML标记。HTML markup.
         markup: 0,
 
-        //js表达式
+        //js表达式。js expression.
         expression: 1,
 
-        //块状js代码
+        //块状js代码。Block js code.
         script: 2
     };
 
     /**
-     * 引号类型枚举
+     * 引号类型枚举。Quotes type enum.
      * @type {{singleQuotes: number, doubleQuotes: number}}
      */
     var quotesEnum = {
@@ -69,14 +70,14 @@ if (isNode) {
     };
 
     /**
-     * @后面所跟 '{' 的类型枚举
+     * '{' 类型枚举。'{' type enum.
      * @type {{noAt: number, atIf: number, atFor: number, atWhile: number, atDo: number, atSwitch: number, atTry: number, atOther: number}}
      */
     var bracesEnum = {
-        //不带@的'{'
+        //不带@的'{'。Without '@'.
         noAt: 0,
 
-        //@if 特殊：可能有else if{...}else{...}
+        //@if 特殊：可能有else if{...}else{...}。Special: maybe follows else if and else in the end.
         atIf: 1,
 
         //@for
@@ -85,21 +86,21 @@ if (isNode) {
         //@while
         atWhile: 3,
 
-        //@do 特殊：可能有while
+        //@do 特殊：可能有while。Special: maybe follows while in the end.
         atDo: 4,
 
         //@switch
         atSwitch: 5,
 
-        //@try　特殊：可能有catch{...}finally{...}
+        //@try　特殊：可能有catch{...}finally{...}。Special: maybe follows catch and finally in the end.
         atTry: 6,
 
-        //@{...}等
+        //@{...}
         atOther: 10
     };
 
     /**
-     * Saker自定义错误
+     * 自定义错误。Custom error.
      * @param message
      * @param stack
      * @constructor
@@ -114,36 +115,48 @@ if (isNode) {
     SakerError.prototype.constructor = SakerError;
 
     /**
-     * 解析处理器
+     * 获取带后缀的文件名。Get file name with extension.
+     * @param filePath
+     * @returns {*}
+     */
+    function getFileWithExt(filePath) {
+        if (filePath.indexOf('.') === -1) {
+            filePath += '.html';
+        }
+        return filePath;
+    }
+
+    /**
+     * 解析处理器。Parse processor.
      * @param source
      * @constructor
      */
     var ParseProcessor = function (source) {
-        //要解析的源码
+        //要解析的源码。To be parsed template source string.
         this.source = source;
 
-        //当前处理的位置
+        //当前处理的位置。Current parsed position of source.
         this.position = 0;
 
-        //当前读取状态
+        //当前读取状态。Current read state, server or client.
         this.state = stateEnum.client;
 
-        //标签计数器，规则：遇到开始标签 '<' push，遇到结束标签 '</' pop
+        //标签计数器，规则：遇到开始标签 '<' push，遇到结束标签 '</' pop。Counter for tags, rule: if '<' push, if '</' pop.
         this.tags = [];
 
-        //引号计数器，规则：当遇到了引号，且引号之前不是'\'时，若数组为空则push，若数组不为空且值与它相同则pop，push类型：{type: quotesEnum.xxx, position: xxx}
+        //引号计数器，规则：当遇到了引号，且引号之前不是'\'时，若数组为空则push，若数组不为空且值与它相同则pop，push类型：{type: quotesEnum.xxx, position: xxx}。Counter for quotes.
         this.quotes = [];
 
-        //左大括号计数器，规则：遇到 '{' push，遇到 '}' pop，push类型：{type: bracesEnum.xxx, position: xxx}
+        //左大括号计数器，规则：遇到 '{' push，遇到 '}' pop，push类型：{type: bracesEnum.xxx, position: xxx}。Counter for braces.
         this.braces = [];
 
-        //左小括号计数器，规则：遇到 '(' push，遇到 ')' pop，push类型：position
+        //左小括号计数器，规则：遇到 '(' push，遇到 ')' pop，push类型：position。Counter for brackets.
         this.brackets = [];
     };
 
     ParseProcessor.prototype = {
         /**
-         * 获取指定位置字符所在的行号、列号、该行的上一行和下两行
+         * 获取指定位置字符所在的行号、列号、该行的上一行和下两行。Get the line number for the position.
          * @returns {{row: Number, col: *, source: Array}}
          */
         getLineNum: function (pos) {
@@ -171,7 +184,7 @@ if (isNode) {
         },
 
         /**
-         * 获取错误stack信息
+         * 获取错误stack信息。Get the stack.
          * @param msg
          * @param pos
          * @returns {string}
@@ -181,7 +194,7 @@ if (isNode) {
         },
 
         /**
-         * 从当前位置开始读取指定长度字符
+         * 从当前位置开始读取指定长度字符。Read text from current position.
          * @returns {string}
          */
         readNextChars: function (len) {
@@ -195,7 +208,7 @@ if (isNode) {
         },
 
         /**
-         * 从当前位置开始向前读取指定长度字符
+         * 从当前位置开始向前读取指定长度字符。Read previous text form last position.
          * @returns {string}
          */
         readPrevChars: function (len) {
@@ -209,12 +222,12 @@ if (isNode) {
         },
 
         /**
-         * 自闭合标签类型
+         * 自闭合标签类型。Self-closing tags type.
          */
         selfClosedTags: ['br', 'hr', 'img', 'input', 'link', 'meta', 'area', 'base', 'col', 'command', 'embed', 'keygen', 'param', 'source', 'track', 'wbr'],
 
         /**
-         * 读取前端标记代码
+         * 读取前端标记代码。Read client markup.
          * @returns {*}
          */
         readMarkup: function () {
@@ -227,7 +240,7 @@ if (isNode) {
             }
             for (; this.position < len; this.position++) {
                 char = this.readNextChars(1);
-                //读到 '@' 就停止，因为 '@' 后面的必定是脚本代码
+                //读到 '@' 就停止，因为 '@' 后面的必定是脚本代码。Stop if '@', for the code behind '@' must be the server scripts.
                 if (char === '@') {
                     break;
                 }
@@ -240,9 +253,9 @@ if (isNode) {
                     });
                 }
 
-                //遇到 > 并且之前已经遇到过开始标签了
+                //遇到 > 并且之前已经遇到过开始标签了。Meet '>' and there exists start tag.
                 if (char === '>' && this.tags.length > 0) {
-                    //...</div> 或者 <img > 的结束
+                    //...</div> , <img >
                     if (new RegExp('<\/' + this.tags[this.tags.length - 1].type + '\s*>$').test(this.readPrevChars() + char) || this.selfClosedTags.indexOf(this.tags[this.tags.length - 1].type) > -1) {
                         this.tags.pop();
                         result += char;
@@ -257,12 +270,13 @@ if (isNode) {
 
                 result += char;
             }
-            this.state = stateEnum.server; //准备进入后端读取模式
+            //准备进入后端读取模式。Ready to switch to backend read mode.
+            this.state = stateEnum.server;
             return result;
         },
 
         /**
-         * 读取行内后端代码
+         * 读取行内后端代码。Read inline code.
          * @returns {*}
          */
         readLineServerCode: function () {
@@ -281,7 +295,7 @@ if (isNode) {
                     this.brackets.pop();
                 }
 
-                //除这些外，且不在引号内部的特殊字符，都break
+                //除这些外，且不在引号内部的特殊字符，都break。Special characters, except the following, and is not in quotes, all break.
                 if (['.', ',', '(', ')', '[', ']', '"', "'", ' '].indexOf(char) === -1 && /\W/.test(char)) {
                     break;
                 }
@@ -309,7 +323,7 @@ if (isNode) {
                     break;
                 }
 
-                //引号的处理
+                //引号的处理。Handle quotes.
                 if ((char === '"' || char === "'") && this.readPrevChars(1) !== '\\') {
                     if (this.quotes.length === 0) {
                         this.quotes.push({
@@ -327,12 +341,13 @@ if (isNode) {
 
                 result += char;
             }
-            this.state = stateEnum.client; //准备进入前端读取模式
+            //准备进入前端读取模式。Ready to switch to frontend read mode.
+            this.state = stateEnum.client;
             return result;
         },
 
         /**
-         * 读取块状后端代码
+         * 读取块状后端代码。Read backend block scripts.
          * @returns {*}
          */
         readBlockServerCode: function () {
@@ -347,9 +362,9 @@ if (isNode) {
             for (; this.position < len; this.position++) {
                 char = this.readNextChars(1);
                 if (char === '@') {
-                    throw new SakerError('在代码块内部，请直接写脚本，不需要加上前缀 @', this.getStackString('在代码块内部，请直接写脚本，不需要加上前缀 @', this.getLineNum(this.position)));
+                    throw new SakerError('In block scripts, please write scripts directly without prefix @ !', this.getStackString('In block scripts, please write scripts directly without prefix @ !', this.getLineNum(this.position)));
                 }
-                //引号的处理
+                //引号的处理。Handle quotes.
                 if ((char === '"' || char === "'") && this.readPrevChars(1) !== '\\') {
                     if (this.quotes.length === 0) {
                         this.quotes.push({
@@ -364,7 +379,7 @@ if (isNode) {
                         }
                     }
                 }
-                //如果 '<' 不在括号内部，则认为是标记语言的开始，退出循环
+                //如果 '<' 不在括号内部，则认为是标记语言的开始，退出循环。If '<' is not in quotes, indicates it's the start of markup, break loop.
                 if (char === '<' && this.quotes.length === 0 &&
                     (this.brackets.length === 0
                         || (this.brackets.length > 0
@@ -379,25 +394,16 @@ if (isNode) {
                 }
 
                 if (char === '{' && this.quotes.length === 0) {
-                    //'@{}'内部又有'@{}'，且内部的 '@{}' 不处在标签内，则认为是语法错误
-                    // if (this.braces[this.braces.length - 1] && (this.braces[this.braces.length - 1].position > (this.tags[this.tags.length - 1] || {position: -1}) .position) && this.readPrevChars(1) === '@') {
-                    //     throw '代码块内部的代码无需再加上 @ 标记。';
-                    // } else {
-                    //     this.braces.push({
-                    //         type: this.readPrevChars(1) === '@' ? bracesEnum.atOther : bracesEnum.noAt,
-                    //         position: this.position
-                    //     });
-                    // }
                     this.braces.push({
                         type: this.readPrevChars(1) === '@' ? bracesEnum.atOther : bracesEnum.noAt,
                         position: this.position
                     });
                 } else if (char === '}' && this.quotes.length === 0) {
                     braceState = this.braces.pop();
-                    //如果该 '}' 对应的是 '@{'
+                    //如果该 '}' 对应的是 '@{'。If the '}' matched '{' has prefix @.
                     if (braceState.type > 0) {
                         if (braceState.type === bracesEnum.atIf && (/(?:^}\s*?else\s*?\{)|(?:^}\s*?else\s+if\s*?\([\s\S]+?\)\s*?\{)/.test(this.readNextChars()))) {
-                            //如果 '}' 后面是 'else {' 或者 'else if {'，依然识别为脚本语言，同时处理下braces
+                            //如果 '}' 后面是 'else {' 或者 'else if {'，依然识别为脚本语言，同时处理下braces。If it is 'else' behind '}', that's backend scripts, and handles braces.
                             matched = this.readNextChars().match(/(?:^}\s*?else\s*?\{)|(?:^}\s*?else\s+if\s*?\([\s\S]+?\)\s*?\{)/);
                             result += matched[0];
                             this.position += matched[0].length - 1;
@@ -407,13 +413,13 @@ if (isNode) {
                             });
                             continue;
                         } else if (braceState.type === bracesEnum.atDo && (/^}\s*?while\s*?\([\s\S]+?\)/.test(this.readNextChars()))) {
-                            //如果 '}' 后面是 'while(...);'，依然识别为脚本语言
+                            //如果 '}' 后面是 'while(...);'，依然识别为脚本语言。If it is 'while' behind '}', that's backend scripts.
                             matched = this.readNextChars().match(/^}\s*?while\s*?\([\s\S]+?\)/);
                             result += matched[0];
                             this.position += matched[0].length - 1;
                             continue;
                         } else if (braceState.type === bracesEnum.atTry && (/(?:^}\s*?catch\([\s\S]+?\)\s*?\{)|(?:^}\s*?finally\s*?\{)/.test(this.readNextChars()))) {
-                            //如果 '}' 后面是 'catch(...){' 或者 'finally {'，依然识别为脚本语言，同时处理下braces
+                            //如果 '}' 后面是 'catch(...){' 或者 'finally {'，依然识别为脚本语言，同时处理下braces。If it is 'catch' or 'finally', that's backend scripts, and handles braces.
                             matched = this.readNextChars().match(/(?:^}\s*?catch\([\s\S]+?\)\s*?\{)|(?:^}\s*?finally\s*?\{)/);
                             result += matched[0];
                             this.position += matched[0].length - 1;
@@ -423,7 +429,7 @@ if (isNode) {
                             });
                             continue;
                         } else {
-                            //否则停止循环，启动标记语言读取模式
+                            //否则停止循环。Otherwise stop loop.
                             result += char;
                             this.position++;
                             break;
@@ -432,13 +438,13 @@ if (isNode) {
                 }
                 result += char;
             }
-
-            this.state = stateEnum.client; //准备进入前端读取模式
+            //准备进入前端读取模式。Ready to switch to frontend read mode.
+            this.state = stateEnum.client;
             return result;
         },
 
         /**
-         * 读取@(...)内的代码
+         * 读取@(...)内的代码。Read scripts in @()
          * @returns {*}
          */
         readBracketCode: function () {
@@ -462,14 +468,14 @@ if (isNode) {
             this.state = stateEnum.client;
             this.position++;
             if (flag !== 0) {
-                throw new SakerError('"(" 找不到相匹配的 ")" ！', this.getStackString('"(" 找不到相匹配的 ")" ！', this.getLineNum(startPosition)));
+                throw new SakerError('"(" not found the matched ")" ！', this.getStackString('"(" not found the matched ")" ！', this.getLineNum(startPosition)));
             }
             return result;
         }
     };
 
     /**
-     * 内容处理器
+     * 内容处理器。Content processor.
      * @constructor
      */
     var ContentProcessor = function () {
@@ -478,7 +484,7 @@ if (isNode) {
 
     ContentProcessor.prototype = {
         /**
-         * 特殊字符转义
+         * 特殊字符转义。Encode special characters.
          * @param str
          * @returns {string|XML}
          */
@@ -488,7 +494,7 @@ if (isNode) {
         },
 
         /**
-         * 添加语句片段
+         * 添加语句片段。Add segment to array.
          * @param obj
          */
         addSegment: function (obj) {
@@ -508,7 +514,7 @@ if (isNode) {
         },
 
         /**
-         * 获取生成的代码字符串
+         * 获取生成的代码字符串。Get scripts string.
          * @returns {string}
          */
         getContent: function () {
@@ -518,7 +524,7 @@ if (isNode) {
 
     var innerHelper = {
         /**
-         * 输出原生未转义的字符串，注意最终还需escapeHtml去处理
+         * 输出原生未转义的字符串，注意最终还需escapeHtml去处理。Output raw string.
          * @param val
          * @returns {{str: *, $saker_raw$: boolean}}
          */
@@ -530,7 +536,7 @@ if (isNode) {
         },
 
         /**
-         * 转义特殊字符
+         * 转义特殊字符。Encode special characters.
          * @param val
          * @returns {XML|string|void|*}
          */
@@ -538,7 +544,7 @@ if (isNode) {
             if (val === undefined || val === null) {
                 return '';
             }
-            //接收到的是raw包装的字符串，则不转义
+            //接收到的是raw包装的字符串，则不转义。If get an object with 'raw' property, no encode.
             if (val.$saker_raw$) {
                 return val.str;
             }
@@ -559,7 +565,7 @@ if (isNode) {
         },
 
         /**
-         * 反转义特殊字符
+         * 反转义特殊字符。Unused now.
          * @param val
          * @returns {XML|string|void|*}
          */
@@ -584,26 +590,28 @@ if (isNode) {
         },
 
         /**
-         * 加载局部视图
+         * 加载局部视图。Render a partial view.
          * @param filePath
          * @param model
          * @returns {*}
          */
         renderPartialFn: function (filePath, model) {
-            if (filePath.indexOf('.') === -1) {
-                filePath += '.html';
-            }
+            filePath = getFileWithExt(filePath);
             filePath = path.join(configure.partialViewDir, filePath);
             var partialTemp = saker.getView(filePath);
-            var html = saker.compile(partialTemp).call({
-                layout: null
-            }, model);
+            try {
+                var html = saker.compile(partialTemp, filePath).call({
+                    layout: null
+                }, model);
+            } catch (err) {
+                throw err;
+            }
             return html;
         }
     };
 
     /**
-     * 中央处理器
+     * 中央处理器。The main processor.
      * @param template
      * @returns {ContentProcessor}
      */
@@ -623,14 +631,14 @@ if (isNode) {
                 });
             } else {
                 nextChar = processor.readNextChars(1);
-                //跳过@符号
+                //跳过@符号。Pass the @
                 if (nextChar === '@') {
                     processor.position++;
                     nextChar = processor.readNextChars(1);
                     //@@
                     if (nextChar === '@') {
                         processor.position++;
-                        processor.state = stateEnum.client; //准备进入前端读取模式
+                        processor.state = stateEnum.client;
                         contentProcessor.addSegment({
                             data: '@',
                             type: modeEnum.markup
@@ -649,7 +657,7 @@ if (isNode) {
                             processor.position += matchedText.length;
                             processor.state = stateEnum.client;
                         } else {
-                            throw new SakerError('后端块状注释 @* 找不到对应的 *@ 结尾！', processor.getStackString('后端块状注释 @* 找不到对应的 *@ 结尾！', processor.getLineNum(this.position)));
+                            throw new SakerError('Comments @* not found the matched *@ ！', processor.getStackString('Comments @* not found the matched *@ ！', processor.getLineNum(processor.position)));
                         }
                     }
                     //@(...)
@@ -765,7 +773,7 @@ if (isNode) {
                     }
                     //@ abc, @", @?等其他特殊字符
                     else {
-                        throw new SakerError('@ 之后不允许有该字符！', processor.getStackString('@ 之后不允许有该字符！', processor.getLineNum(processor.position)));
+                        throw new SakerError('Illegal character after @ ! ', processor.getStackString('Illegal character after @ ! ', processor.getLineNum(processor.position)));
                     }
                 } else {
                     code = processor.readBlockServerCode();
@@ -776,22 +784,22 @@ if (isNode) {
                 }
             }
         }
-        //匹配情况检查
+        //匹配情况检查。Check match.
         if (processor.tags.length > 0) {
-            throw new SakerError('存在未关闭的标签！', processor.getStackString('存在未关闭的标签！', processor.getLineNum(processor.tags[processor.tags.length - 1].position)));
+            throw new SakerError('There exists unclosed tags！', processor.getStackString('There exists unclosed tags！', processor.getLineNum(processor.tags[processor.tags.length - 1].position)));
         }
         if (processor.braces.length > 0) {
-            throw new SakerError('存在不匹配的大括号！', processor.getStackString('存在不匹配的大括号！', processor.getLineNum(processor.braces[processor.braces.length - 1].position)));
+            throw new SakerError('There exists unmatched braces！', processor.getStackString('There exists unmatched braces！', processor.getLineNum(processor.braces[processor.braces.length - 1].position)));
         }
         if (processor.brackets.length > 0) {
-            throw new SakerError('存在不匹配的小括号！', processor.getStackString('存在不匹配的小括号！', processor.getLineNum(processor.brackets[processor.brackets.length - 1])));
+            throw new SakerError('There exits unmatched brackets！', processor.getStackString('There exits unmatched brackets！', processor.getLineNum(processor.brackets[processor.brackets.length - 1])));
         }
         return contentProcessor;
     };
 
     var saker = {
         /**
-         * 合并配置项
+         * 合并配置项。Combine config object.
          * @param passObj
          */
         config: function (passObj) {
@@ -803,14 +811,12 @@ if (isNode) {
         },
 
         /**
-         * 根据视图文件路径获取文件
+         * 根据视图文件路径获取文件。Get view file according to the file path.
          * @param filePath
          * @param cb
          */
         getView: function (filePath, cb) {
-            if (filePath.indexOf('.') === -1) {
-                filePath += '.html';
-            }
+            filePath = getFileWithExt(filePath);
             if (cb) {
                 fs.readFile(filePath, function (err, data) {
                     if (err) {
@@ -830,11 +836,12 @@ if (isNode) {
         },
 
         /**
-         * 根据给定模板字符串进行编译
+         * 根据给定模板字符串进行编译。Compile the given template string, and return a complied function.
          * @param template
          */
         compile: function (template) {
             var that = this;
+            var filePath = arguments[1];
             var contentProcessor = centerProcessor(template);
             var content = contentProcessor.getContent();
             if (configure.debug) {
@@ -858,12 +865,12 @@ if (isNode) {
                         },
                         _renderPartialFn: innerHelper.renderPartialFn
                     };
-                //将 this.xxx 赋到 saker.xxx 上
+                //将 this.xxx 赋到 saker.xxx 上。Assign this.xxx to saker.xxx
                 variables += 'var saker = {};\n';
                 Object.keys(thisObj).forEach(function (item) {
                     variables += 'saker.' + item + ' = this.' + item + ';\n';
                 });
-                //允许将 @model.xxx 简写为 @xxx
+                //允许将 @model.xxx 简写为 @xxx。Allow @model.xxx to @xxx.
                 if (typeof model === 'object' && Object.keys(model).length > 0) {
                     Object.keys(model).forEach(function (item) {
                         variables += 'var ' + item + ' = model.' + item + ';\n';
@@ -871,27 +878,27 @@ if (isNode) {
                 }
                 fn += variables;
                 fn += 'var $saker_escapeHtml$ = ' + innerHelper.escapeHtml.toString() + ';\n';
-                //定义write、writeLiteral
+                //write、writeLiteral
                 fn += 'var _this = this,$saker_data$ = [],\n $saker_writeLiteral$ = function(code) { $saker_data$.push(code); },\n $saker_write$ = function(code){ $saker_writeLiteral$(($saker_escapeHtml$(code))); };\n';
-                //定义renderPartial，引用外部的_renderPartialFn方法
+                //renderPartial
                 fn += 'this.renderPartial = saker.renderPartial = function(filePath){$saker_data$.push(this._renderPartialFn(filePath, model));};\n';
-                //renderBody，引用外部的_renderBodyFn方法
+                //renderBody
                 fn += 'this.renderBody = saker.renderBody = function(){model.$renderBodyFlag$ = true;$saker_data$.push(this._renderBodyFn());};\n';
-                //附加解析后的脚本
+                //附加解析后的脚本。Attach parsed scripts.
                 fn += content + '\n';
                 fn += 'return $saker_data$.join("");';
 
                 if (cb) {
-                    //异步方式
+                    //异步方式。Async type.
                     setImmediate(function () {
                         var html = '';
                         try {
-                            //eval处理js代码
+                            //eval处理js代码。eval to evaluate js.
                             html = new Function('model', fn).call(thisObj, model);
                         } catch (err) {
-                            return cb(err);
+                            return cb(new SakerError(err.message, err.stack + (filePath ? ('\n    at template file (' + getFileWithExt(filePath) + ')') : '' )));
                         }
-                        //过滤<text>标签
+                        //过滤<text>标签。Filter <text> tags.
                         html = html.replace(/<text>([\s\S]*?)<\/text>/g, function (a, b) {
                             return b;
                         });
@@ -902,22 +909,24 @@ if (isNode) {
                             console.log('html end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n\n');
                         }
 
-                        //浏览器端
+                        //浏览器端。The browsers.
                         if (!isNode) {
                             return cb(null, html);
                         }
 
-                        //以该回调函数执行时作用域内部的this.layout为准，修正thisObj.layout
+                        //以该回调函数执行时作用域内部的this.layout为准，修正thisObj.layout。Base on the layout in current scope, to fix thisObj.layout.
                         if (_this.layout !== undefined) {
                             thisObj.layout = _this.layout;
                         }
 
-                        //没有设置layout，则取默认layout
+                        //没有设置layout，则取默认layout。Not set layout, use default layout.
                         if (thisObj.layout === undefined) {
                             thisObj.layout = configure.defaultLayout;
                         }
+                        var layoutPath = thisObj.layout;
                         if (thisObj.layout) {
-                            if (model.settings) {
+                            //说明当前是用的Express框架。Indicates this is used in Express framework.
+                            if (model.settings && model.settings.views) {
                                 thisObj.layout = path.join(model.settings.views, thisObj.layout);
                             }
                             that.getView(thisObj.layout, function (err, layoutTemp) {
@@ -927,16 +936,17 @@ if (isNode) {
                                     thisObj.layout = null;
                                     model.$saker_body$ = html;
                                     try {
-                                        var fn = that.compile(layoutTemp);
+                                        var fn = that.compile(layoutTemp, layoutPath);
                                     } catch (err) {
                                         return cb(err);
                                     }
                                     fn.call(thisObj, model, function (err, layoutHtml) {
-                                        //判断layout中是否调用了renderBody方法
+                                        if (err) {
+                                            return cb(err);
+                                        }
+                                        //判断layout中是否调用了renderBody方法。Check whether call renderBody function.
                                         if (!model.$renderBodyFlag$) {
-                                            cb(new SakerError('layout模板中没有renderBody方法！', 'Saker Layout Error: layout模板中没有renderBody方法！'))
-                                        } else if (err) {
-                                            cb(err);
+                                            cb(new SakerError('Missing renderBody in layout: ' + layoutPath + ' ！', 'Saker Layout Error: Missing renderBody in layout: ' + layoutPath + ' ！'))
                                         } else {
                                             cb(null, layoutHtml);
                                         }
@@ -944,21 +954,19 @@ if (isNode) {
                                 }
                             })
                         } else {
-                            //layout为空或null
+                            //layout为空或null。layout is set to empty string or just null.
                             cb(null, html);
                         }
 
                     });
                 } else {
-                    //同步方式
+                    //同步方式。Sync type.
                     var html = '';
                     try {
-                        //eval处理js代码
                         html = new Function('model', fn).call(thisObj, model);
                     } catch (err) {
-                        throw err;
+                        throw new SakerError(err.message, err.stack + (filePath ? ('\n    at template file (' + getFileWithExt(filePath) + ')') : '' ));
                     }
-                    //过滤<text>标签
                     html = html.replace(/<text>([\s\S]*?)<\/text>/g, function (a, b) {
                         return b;
                     });
@@ -969,35 +977,31 @@ if (isNode) {
                         console.log('html end <<<<<<<<<<<<<<<<<<<<<<\n\n');
                     }
 
-                    //浏览器端
                     if (!isNode) {
                         return html;
                     }
 
-                    //以该回调函数执行时作用域内部的this.layout为准，修正thisObj.layout
                     if (_this.layout !== undefined) {
                         thisObj.layout = _this.layout;
                     }
 
-                    //没有设置layout，则取默认layout
                     if (thisObj.layout === undefined) {
                         thisObj.layout = configure.defaultLayout;
                     }
+                    var layoutPath = thisObj.layout;
                     if (thisObj.layout) {
-                        //说明该方法是在Express中被调用的
-                        if (model.settings) {
+                        if (model.settings && model.settings.views) {
                             thisObj.layout = path.join(model.settings.views, thisObj.layout);
                         }
                         var layoutTemp = that.getView(thisObj.layout);
                         thisObj.layout = null;
                         model.$saker_body$ = html;
-                        var layoutHtml = that.compile(layoutTemp).call(thisObj, model);
+                        var layoutHtml = that.compile(layoutTemp, layoutPath).call(thisObj, model);
                         if (!model.$renderBodyFlag$) {
-                            throw new SakerError('layout模板中没有renderBody方法！', 'Saker Layout Error: layout模板中没有renderBody方法！');
+                            throw new SakerError('Missing renderBody in layout: ' + layoutPath + ' ！', 'Saker Layout Error: Missing renderBody in layout: ' + layoutPath + ' ！');
                         }
                         return layoutHtml;
                     } else {
-                        //layout为空或null
                         return html;
                     }
                 }
@@ -1005,7 +1009,7 @@ if (isNode) {
         },
 
         /**
-         * 根据文件路径和数据生成html
+         * 根据文件路径和数据生成html。Generate html according to file path and data model.
          * @param filePath
          * @param model
          * @param cb
@@ -1025,7 +1029,7 @@ if (isNode) {
                         return cb(err);
                     }
                     try {
-                        var compiled = saker.compile(template);
+                        var compiled = saker.compile(template, filePath);
                     } catch (err) {
                         return cb(err);
                     }
