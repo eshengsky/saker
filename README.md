@@ -1,3 +1,5 @@
+<a href="https://eshengsky.github.io/saker/"><img src="https://github.com/eshengsky/saker/blob/master/logo.png" height="150" align="right"></a>
+
 # Saker
 Full documentation is at [https://eshengsky.github.io/saker/](https://eshengsky.github.io/saker/).
 
