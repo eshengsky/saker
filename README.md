@@ -9,6 +9,7 @@ The greatest feature is, Saker minimizes the number of characters and keystrokes
 
 [![Build Status](https://travis-ci.org/eshengsky/saker.svg?branch=master)](https://travis-ci.org/eshengsky/saker)
 [![NPM version](https://img.shields.io/npm/v/saker.svg?style=flat)](https://www.npmjs.com/package/saker)
+<a href="https://www.npmjs.com/package/saker"><img src="https://img.shields.io/npm/dt/saker.svg" alt="NPM downloads" height="18"></a>
 
 ## Live Demo
 You can test drive Saker online [here](https://eshengsky.github.io/saker/live-demo.html).
