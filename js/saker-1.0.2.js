@@ -663,7 +663,7 @@ if (isNode) {
                     //@(...)
                     else if (nextChar === '(') {
                         code = processor.readBracketCode();
-                        if (/\(\s*\)/.test(code)) {
+                        if (/^\(\s*\)$/.test(code)) {
                             code = '';
                         }
                         contentProcessor.addSegment({
