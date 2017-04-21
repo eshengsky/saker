@@ -146,6 +146,19 @@ describe('【saker测试用例。saker test cases.】', function () {
             });
         });
 
+        it('包含有短横。Included "-".', function (done) {
+            var expected = '<div class="a,b,c"></div>';
+            saker.compile('<div class="@str.split(\'-\')"></div>').call({
+                layout: null
+            }, {
+                str: 'a-b-c'
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
         it('后面跟空格。Followed by whitespace', function (done) {
             var expected = '<div class="active red"></div>';
             saker.compile('<div class="@clsName red"></div>').call({
