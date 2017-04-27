@@ -1,6 +1,6 @@
 {
   "name": "saker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Saker is a template engine for Node.js and browsers, it is lightweight, powerfull and easy to use.",
   "main": "lib/saker.js",
   "scripts": {

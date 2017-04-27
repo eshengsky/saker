@@ -428,6 +428,28 @@ describe('【saker测试用例。saker test cases.】', function () {
             });
         });
 
+        it('普通闭合标签包含"\\"。Exists "\\" in common closed tag.', function (done) {
+            var expected = '<script>document.write("<div>aaa<\\/div>");</script>';
+            saker.compile('<script>document.write("<div>aaa<\\/div>");</script>').call({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
+        it('自闭合标签包含"\\"。Exists "\\" in self closed tag.', function (done) {
+            var expected = '<script>document.write("<img \\/>");</script>';
+            saker.compile('<script>document.write("<img \\/>");</script>').call({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
+
         it('输出@符号。Output @.', function (done) {
             var expected = 'eshengsky@163.com';
             saker.compile('eshengsky@@163.com').call({
