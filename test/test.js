@@ -460,5 +460,16 @@ describe('【saker测试用例。saker test cases.】', function () {
                 done();
             });
         });
+
+        it('代码块模式中的HTML空格处理。HTML Whitespace handle in block code.', function (done) {
+            var expected = '<div>aaa</div>\n<div>bbb</div>';
+            saker.compile('@if(true){<div>aaa</div>\n<div>bbb</div>}').call({
+                layout: null
+            }, function (err, actual) {
+                if (err) return done(err);
+                assert.equal(actual, expected);
+                done();
+            });
+        });
     });
 });
