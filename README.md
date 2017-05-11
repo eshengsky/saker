@@ -184,9 +184,9 @@ For more examples, please see `examples` folder, it includes 3 examples each bas
 
 ## Syntax 语法
 
-As you see above, Saker uses '@' as the mark symbol - the codes after it represent server-side scripts.
+As you see above, Saker uses '@' as the default mark symbol (support custom) - the codes after it represent server-side scripts.
 The following is the syntax cheat sheet, for more details you can see [Syntax Reference](https://eshengsky.github.io/saker/syntax.html).  
-正如你在上面看到的，Saker使用'@'作为标记符号——在这之后的代码都视作是服务器端脚本。下面是一个语法速查，更详细的文档请查看[Syntax Reference](https://eshengsky.github.io/saker/syntax.html)。
+正如你在上面看到的，Saker使用'@'作为默认的标记符号（支持自定义）——在这之后的代码都视作是服务器端脚本。下面是一个语法速查，更详细的文档请查看[Syntax Reference](https://eshengsky.github.io/saker/syntax.html)。
 
 <table>
 <tr>
