@@ -6,7 +6,7 @@ Full documentation is at [https://eshengsky.github.io/saker/](https://eshengsky.
 
 Saker is a template engine for [Node.js](https://nodejs.org) and browsers, it is lightweight, powerfull and easy to use.  
 The greatest feature is, Saker minimizes the number of characters and keystrokes required in a file, and enables a fast, fluid coding workflow. Unlike most template syntaxes, you do not need to interrupt your coding to explicitly denote server blocks within your HTML. See [Example](https://github.com/eshengsky/saker#example-示例) for preview.  
-Saker是一个可以用于Node.js和浏览器端的模板引擎，轻量、强大、易于使用。其最大的特点是，尽可能减少了文件中的额外字符和击键数，并支持快速流畅的编码工作流程。不同于大多数的模板引擎语法，你无须打断你的编码，来显式表明HTML中的服务器代码。可以查看[示例](https://github.com/eshengsky/saker#example-示例)代码作为预览。
+Saker是一个可以用于Node.js和浏览器端的模板引擎，轻量、强大、易于使用。其最大的特点是，尽可能地减少了模板文件中的额外字符和击键数，支持快速流畅的编码流程。不同于大多数的模板引擎语法，你无须打断你的编码来显式表明HTML中的服务器代码 —— Saker能够智能识别哪些是HTML哪些是服务器脚本。可以查看[示例](https://github.com/eshengsky/saker#example-示例)代码作为预览。
 
 [![Build Status](https://travis-ci.org/eshengsky/saker.svg?branch=master)](https://travis-ci.org/eshengsky/saker)
 [![NPM version](https://img.shields.io/npm/v/saker.svg?style=flat)](https://www.npmjs.com/package/saker)
@@ -14,7 +14,7 @@ Saker是一个可以用于Node.js和浏览器端的模板引擎，轻量、强�
 
 ## Comparison 比较
 Let's compare Saker with other hot template engines.  
-Saker和当前较流行的几款模板引擎的比较。
+Saker和当前较流行的几款模板引擎（Jade、Handlebars、ejs）的比较。
 
 <table>
 <tr>
